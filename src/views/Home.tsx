@@ -1,6 +1,4 @@
  /* 描述: 首页模板
- *  作者: Jack Chen
- *  日期: 2020-08-09
  */
 
 import * as React from 'react';
