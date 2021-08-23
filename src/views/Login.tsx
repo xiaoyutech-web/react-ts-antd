@@ -1,7 +1,5 @@
 
  /* 描述: 登录模板
- *  作者: Jack Chen
- *  日期: 2020-08-05
  */
 
 
@@ -111,12 +109,12 @@ class Login extends React.Component<IProps, IState> {
         const { formLogin, checked } = this.state;
 
         if (!validUserName(formLogin.userName)) {
-            message.error('请输入正确的邮箱/手机号');
+            message.error('请输入正确的账号');
             return false;
         }
     
         if (!validPass(formLogin.userPwd)) {
-            message.error('密码应为8到20位字母或数字！');
+            message.error('密码应为6到20位字母或数字！');
             return false;
         }
         
@@ -153,10 +151,10 @@ class Login extends React.Component<IProps, IState> {
         const { formRegister } = this.state;
 
         if (!validUserName(formRegister.userName)) {
-            message.error("请输入正确的邮箱/手机号");
+            message.error("请输入正确的账号");
             return false;
         } else if (!validPass(formRegister.userPwd)) {
-            message.error("密码应为8到20位字母或数字！");
+            message.error("密码应为6到20位字母或数字！");
             return false;
         } else if (!validPass(formRegister.userPwd2)){
             message.error("确认密码有误");
@@ -271,7 +269,7 @@ class Login extends React.Component<IProps, IState> {
                 <div className="login-container">
                 <div className="pageHeader">
                     <img src={ logo } alt="logo" />
-                    <span>后台管理模板</span>
+                    <span>代码大赛-产品质量评审管理平台</span>
                 </div>
                 <div className="login-box">
                     <div className="login-text">
@@ -285,7 +283,7 @@ class Login extends React.Component<IProps, IState> {
                                 className="input"
                                 value={ formLogin.userName }
                                 onChange={ (e: any) => this.handleChangeInput(e, 1) }
-                                placeholder="请输入登录邮箱/手机号"
+                                placeholder="请输入登录账号"
                             />
                             <Input
                                 type="password"
