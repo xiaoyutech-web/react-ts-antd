@@ -216,7 +216,7 @@ class Login extends React.Component<IProps, IState> {
 
     // 忘记密码界面
     forgetPwd = () => {
-        message.info('忘记密码，请联系客服');
+        message.info('忘记密码，请联系管理员');
     }
 
     // 监听输入登录信息
@@ -276,11 +276,8 @@ class Login extends React.Component<IProps, IState> {
                 <div className="login-box">
                     <div className="login-text">
                         <span className={ typeView === 0 ? 'active' : '' } onClick={ () => this.handleTab(0) }>登录</span>
-                        <b>·</b>
-                        <span className={ typeView === 1 ? 'active' : '' } onClick={ () => this.handleTab(1) }>注册</span>
                     </div>
-
-                { typeView === 0 ? 
+          
                     <div className="right-content">
                         <div className="input-box">
                             <Input
@@ -307,38 +304,7 @@ class Login extends React.Component<IProps, IState> {
                             </Checkbox>
                             <span className="forget-pwd" onClick={ this.forgetPwd }>忘记密码?</span>
                         </div>
-                    </div>
-                    :
-                    <div className="right_content">
-                        <div className="input-box">
-                            <Input
-                                type="text"
-                                className="input"
-                                value={ formRegister.userName }
-                                onChange={ (e: any) => this.handleChangeRegister(e, 1) }
-                                placeholder="请输入注册邮箱/手机号"
-                            />
-                            <Input
-                                type="password"
-                                className="input"
-                                maxLength={ 20 }
-                                value={ formRegister.userPwd }
-                                onChange={ (e: any) => this.handleChangeRegister(e, 2) }
-                                placeholder="请输入密码"
-                            />
-                            <Input
-                                type="password"
-                                className="input"
-                                maxLength={ 20 }
-                                value={ formRegister.userPwd2 }
-                                onChange={ (e: any) => this.handleChangeRegister(e, 3) }
-                                onPressEnter={ (e: any) => this.handleEnterKey(e, 2) }
-                                placeholder="请再次确认密码"
-                            />
-                        </div>
-                        <Button className="loginBtn" type="primary" onClick={ this.handleRegister } disabled={ !formRegister.userName || !formRegister.userPwd || !formRegister.userPwd2 }>立即注册</Button>
-                    </div>
-                }
+                    </div>             
                 
                 </div>
 
