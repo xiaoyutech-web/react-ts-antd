@@ -8,7 +8,7 @@ import { Input, Button, Checkbox, message } from 'antd';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { login, register } from '@/store/actions';
-import logo from "@/assets/logo_2.png";
+import logo from "@/assets/logo_head.png";
 import '@/styles/login.less';
 import { validUserName, validPass } from '@/utils/valid';
 import DocumentTitle from 'react-document-title';

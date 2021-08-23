@@ -7,7 +7,7 @@ import { Menu, Dropdown, Modal, Form, Button, Input, message } from 'antd';
 import store from '@/store';
 import { logout } from '@/store/actions';
 import { DownOutlined } from '@ant-design/icons';
-import logo from '@/assets/logo_2.png';
+import logo from '@/assets/logo_head.png';
 import avatar from '@/assets/avatar.jpg';
 import '@/styles/header.less';
 import { resetPwd } from '@/utils/api';
