@@ -24,8 +24,8 @@ const addCustomize = () => (config) => {
   // config.output.path = resolve('dist');
   if (config.output.publicPath) {
     config.output.publicPath = 
-    // '/quality/judge/';
-       isProduction ? '/quality/judge/' : '/';
+    // '/view/quality/judge/';
+       isProduction ? '/view/quality/judge/' : '/';
   }
 
   if (config.resolve) {
