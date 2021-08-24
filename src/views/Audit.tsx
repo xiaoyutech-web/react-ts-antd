@@ -57,13 +57,13 @@ class Audit extends React.Component<any> {
             <Divider orientation="left" style={{ fontWeight: "bold" }}>
               参赛者信息
             </Divider>
-            <div className="content">
+            <div className="item">
               参赛团队：
-              <Cascader
+              <Cascader 
                 fieldNames={{ label: "name", value: "code", children: "items" }}
                 placeholder="请选择"
               />
-              被评审产品/模块：
+              <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品/模块： </span>
               <Cascader
                 fieldNames={{ label: "name", value: "code", children: "items" }}
                 placeholder="请选择"
@@ -92,6 +92,7 @@ class Audit extends React.Component<any> {
                 <Form.Item
                   style={{
                     display: "inline-flex",
+                    marginBottom: "0",
                     width: "calc(25% - 4px)",
                   }}
                   name="sucess_assert"
@@ -101,6 +102,7 @@ class Audit extends React.Component<any> {
                 <Form.Item
                   style={{
                     display: "inline-flex",
+                    marginBottom: "0",
                     width: "calc(35% - 4px)",
                     marginLeft: "0px",
                   }}
@@ -112,6 +114,7 @@ class Audit extends React.Component<any> {
                 <Form.Item
                   style={{
                     display: "inline-flex",
+                    marginBottom: "0",
                     width: "calc(35% - 4px)",
                     marginLeft: "8px",
                   }}
@@ -131,10 +134,10 @@ class Audit extends React.Component<any> {
                 <InputNumber min={0} />
               </Form.Item>{" "}
               <Form.Item label="质量评分：">
-                <InputNumber min={0} />
+                <InputNumber min={0} max={100} placeholder="0~100" />
               </Form.Item>{" "}
               <Form.Item label="有效性评分：">
-                <InputNumber min={0} />
+                <InputNumber min={0} max={100} placeholder="0~100" />
               </Form.Item>
             </Form>
           </div>
@@ -149,13 +152,13 @@ class Audit extends React.Component<any> {
               size="small"
             >
               <Form.Item label="行覆盖率：">
-                <InputNumber min={0} />
-              </Form.Item>{" "}
+                <InputNumber min={0} max={100} />%
+              </Form.Item>
               <Form.Item label="分支覆盖率：">
-                <InputNumber min={0} />
-              </Form.Item>{" "}
+                <InputNumber min={0} max={100} />%
+              </Form.Item>
               <Form.Item label="产品质量评分：">
-                <InputNumber min={0} />
+                <InputNumber min={0} max={100} placeholder="0~100" />
               </Form.Item>
             </Form>
           </div>
