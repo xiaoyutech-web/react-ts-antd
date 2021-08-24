@@ -22,7 +22,7 @@ import { ColumnsType } from "antd/es/table";
 import moment from "moment";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import "@/styles/home.less";
+import "@/styles/audit.less";
 
 import { formatDate } from "@/utils/valid";
 
@@ -51,30 +51,36 @@ class Audit extends React.Component<any> {
   render() {
     return (
       <DocumentTitle title={"产品评审"}>
-        <div className="home-container">
+        <div className="audit-container">
           <Header curActive={"/audit"} />
           <div className="content">
-            <Divider orientation="left">参赛者信息</Divider>
-            参赛团队：
-            <Cascader
-              fieldNames={{ label: "name", value: "code", children: "items" }}
-              placeholder="Please select"
-            />
-            被评审产品/模块：
-            <Cascader
-              fieldNames={{ label: "name", value: "code", children: "items" }}
-              placeholder="Please select"
-            />
+            <Divider orientation="left" style={{ fontWeight: "bold" }}>
+              参赛者信息
+            </Divider>
+            <div className="content">
+              参赛团队：
+              <Cascader
+                fieldNames={{ label: "name", value: "code", children: "items" }}
+                placeholder="请选择"
+              />
+              被评审产品/模块：
+              <Cascader
+                fieldNames={{ label: "name", value: "code", children: "items" }}
+                placeholder="请选择"
+              />
+            </div>
           </div>
-          <div>
-            <Divider orientation="left">用例</Divider>
+          <div className="content">
+            <Divider orientation="left" style={{ fontWeight: "bold" }}>
+              用例
+            </Divider>
             <Form
               labelCol={{ span: 4 }}
-              wrapperCol={{ span: 14 }}
+              wrapperCol={{ span: 10 }}
               layout="horizontal"
               size="small"
             >
-              <Form.Item label="运行结果" name="size">
+              <Form.Item label="运行结果" name="size" initialValue={1}>
                 <Radio.Group>
                   <Radio value="1" defaultChecked>
                     成功
@@ -83,13 +89,37 @@ class Audit extends React.Component<any> {
                 </Radio.Group>
               </Form.Item>
               <Form.Item label="有断言且成功：">
-                <InputNumber min={0} />
-              </Form.Item>{" "}
-              <Form.Item label="无断言但成功：">
-                <InputNumber min={0} />
-              </Form.Item>{" "}
-              <Form.Item label="有断言且断言失败：">
-                <InputNumber min={0} />
+                <Form.Item
+                  style={{
+                    display: "inline-flex",
+                    width: "calc(25% - 4px)",
+                  }}
+                  name="sucess_assert"
+                >
+                  <InputNumber min={0} placeholder="默认0" />
+                </Form.Item>
+                <Form.Item
+                  style={{
+                    display: "inline-flex",
+                    width: "calc(35% - 4px)",
+                    marginLeft: "0px",
+                  }}
+                  name="sucess_no_assert"
+                  label="无断言但成功："
+                >
+                  <InputNumber min={0} placeholder="默认0" />
+                </Form.Item>
+                <Form.Item
+                  style={{
+                    display: "inline-flex",
+                    width: "calc(35% - 4px)",
+                    marginLeft: "8px",
+                  }}
+                  name="failed_assert"
+                  label="有断言且断言失败："
+                >
+                  <InputNumber min={0} placeholder="默认0" />
+                </Form.Item>
               </Form.Item>
               <Form.Item label="异常失败：">
                 <InputNumber min={0} />
@@ -108,8 +138,10 @@ class Audit extends React.Component<any> {
               </Form.Item>
             </Form>
           </div>
-          <div>
-            <Divider orientation="left">覆盖率</Divider>
+          <div className="content">
+            <Divider orientation="left" style={{ fontWeight: "bold" }}>
+              覆盖率
+            </Divider>
             <Form
               labelCol={{ span: 4 }}
               wrapperCol={{ span: 14 }}
