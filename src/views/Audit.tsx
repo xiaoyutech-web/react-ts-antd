@@ -59,7 +59,7 @@ class Audit extends React.Component<any> {
             </Divider>
             <div className="item">
               参赛团队：
-              <Cascader 
+              <Cascader
                 fieldNames={{ label: "name", value: "code", children: "items" }}
                 placeholder="请选择"
               />
@@ -82,10 +82,10 @@ class Audit extends React.Component<any> {
             >
               <Form.Item label="运行结果" name="size" initialValue={1}>
                 <Radio.Group>
-                  <Radio value="1" defaultChecked>
+                  <Radio value={1} defaultChecked>
                     成功
                   </Radio>
-                  <Radio value="0">失败</Radio>
+                  <Radio value={0}>失败</Radio>
                 </Radio.Group>
               </Form.Item>
               <Form.Item label="有断言且成功：">
@@ -119,7 +119,7 @@ class Audit extends React.Component<any> {
                     marginLeft: "8px",
                   }}
                   name="failed_assert"
-                  label="有断言且断言失败："
+                  label="有断言但断言失败："
                 >
                   <InputNumber min={0} placeholder="默认0" />
                 </Form.Item>
