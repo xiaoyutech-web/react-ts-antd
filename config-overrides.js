@@ -23,8 +23,9 @@ const addCustomize = () => (config) => {
   // 配置打包后的文件位置
   // config.output.path = resolve('dist');
   if (config.output.publicPath) {
-    config.output.publicPath = '/';
-      // isProduction ? '/react-ts-antd-admin/' : '/';
+    config.output.publicPath = 
+    // '/quality/judge/';
+       isProduction ? '/quality/judge/' : '/';
   }
 
   if (config.resolve) {
