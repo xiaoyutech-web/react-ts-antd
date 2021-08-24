@@ -1,8 +1,5 @@
-
  /* 描述: 登录模板
  */
-
-
 import * as React from 'react';
 import { Input, Button, Checkbox, message } from 'antd';
 import { connect } from 'react-redux';

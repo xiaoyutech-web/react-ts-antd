@@ -1,8 +1,10 @@
-/* 描述: 排名模板
+/* 描述: 排名
  */
 
 import * as React from "react";
 import DocumentTitle from "react-document-title";
+import { Column ,Line} from "@ant-design/charts";
+import { useState, useEffect } from 'react';
 import {
   Drawer,
   Button,
@@ -29,7 +31,7 @@ import {
   updateMark,
   deleteTask,
 } from "@/utils/api";
-import { formatDate ,formatTime} from "@/utils/valid";
+import { formatDate, formatTime } from "@/utils/valid";
 
 interface Task {
   id: number;
@@ -70,101 +72,6 @@ interface IProps {
   onCloseDrawer: () => void;
 }
 
-const AddEditTaskForm: React.FC<IProps> = ({
-  title,
-  textBtn,
-  visible,
-  currentRowData,
-  onSubmitDrawer,
-  onCloseDrawer,
-}) => {
-  const [form] = Form.useForm();
-
-  console.log("currentRowData===", currentRowData);
-  setTimeout(() => {
-    form.setFieldsValue(currentRowData);
-  }, 100);
-
-  const onSubmit = () => {
-    form
-      .validateFields()
-      .then((values: any) => {
-        if (title === "添加任务") {
-          onSubmitDrawer(values, 1);
-        } else {
-          onSubmitDrawer(values, 2);
-        }
-      })
-      .catch((info) => {
-        console.log("Validate Failed:", info);
-      });
-  };
-
-  const onReset = () => {
-    form.resetFields();
-  };
-
-  const onClose = () => {
-    form.resetFields();
-    onCloseDrawer();
-  };
-
-  return (
-    <Drawer
-      forceRender
-      title={title}
-      width={600}
-      onClose={onClose}
-      visible={visible}
-      bodyStyle={{ paddingBottom: 80 }}
-      maskClosable={false}
-      footer={
-        <div style={{ display: "flex", justifyContent: "space-around" }}>
-          <Button onClick={onSubmit} type="primary">
-            {textBtn}
-          </Button>
-          <Button onClick={onReset}>重置</Button>
-          <Button onClick={onClose} danger>
-            取消
-          </Button>
-        </div>
-      }
-    >
-      <Form form={form} layout="vertical" name="form_in_modal">
-        <Form.Item
-          label="任务名称"
-          name="title"
-          rules={[{ required: true, message: "请输入任务名称" }]}
-        >
-          <Input placeholder="请输入任务名称" />
-        </Form.Item>
-        <Form.Item
-          label="截止日期"
-          name="date"
-          rules={[{ required: true, message: "请选择截止日期" }]}
-        >
-          <DatePicker
-            inputReadOnly={true}
-            placeholder="请选择截止日期"
-            style={{ width: "100%" }}
-          />
-        </Form.Item>
-        <Form.Item
-          label="任务内容"
-          name="content"
-          rules={[{ required: true, message: "请输入任务内容" }]}
-        >
-          <Input.TextArea
-            rows={7}
-            placeholder="请输入任务内容"
-            className="textarea"
-          />
-        </Form.Item>
-      </Form>
-    </Drawer>
-  );
-};
-
 class Rank extends React.Component<any, IState> {
   constructor(props: any) {
     super(props);
@@ -183,6 +90,7 @@ class Rank extends React.Component<any, IState> {
       },
       visible: false,
       dataSource: [],
+
       status: null, // 0：待办 1：完成 2：删除
       columns: [
         {
@@ -272,7 +180,6 @@ class Rank extends React.Component<any, IState> {
           key: "gmt_expire",
           render: (text: any, record: any) => formatTime(record.gmt_expire),
         },
-        
       ],
     };
   }
@@ -567,7 +474,62 @@ class Rank extends React.Component<any, IState> {
       currentRowData,
     } = this.state;
     const { Option } = Select;
-
+    var data = [
+      {
+        type: "家具家电",
+        sales: 38,
+      },
+      {
+        type: "粮油副食",
+        sales: 52,
+      },
+      {
+        type: "生鲜水果",
+        sales: 61,
+      },
+      {
+        type: "美容洗护",
+        sales: 145,
+      },
+      {
+        type: "母婴用品",
+        sales: 48,
+      },
+      {
+        type: "进口食品",
+        sales: 38,
+      },
+      {
+        type: "食品饮料",
+        sales: 38,
+      },
+      {
+        type: "家庭清洁",
+        sales: 38,
+      },
+    ];
+    const config: any =  {
+      data: data,
+      xField: "type",
+      yField: "sales",
+      label: {
+        position: "middle",
+        style: {
+          fill: "#FFFFFF",
+          opacity: 0.6,
+        },
+      },
+      xAxis: {
+        label: {
+          autoHide: true,
+          autoRotate: false,
+        },
+      },
+      meta: {
+        type: { alias: "类别" },
+        sales: { alias: "销售额" },
+      },
+    };
     return (
       <DocumentTitle title={"排名"}>
         <div className="home-container">
@@ -594,7 +556,8 @@ class Rank extends React.Component<any, IState> {
                 </Space>
               </div>
             </div>
-
+            <Column  style={{padding:50}} {...config} /> 
+          
             <Table
               bordered
               rowKey={(record) => record.id}
@@ -617,15 +580,6 @@ class Rank extends React.Component<any, IState> {
           </div>
 
           <Footer />
-
-          <AddEditTaskForm
-            title={title}
-            textBtn={textBtn}
-            visible={visible}
-            currentRowData={currentRowData}
-            onSubmitDrawer={this.onSubmit}
-            onCloseDrawer={this.onClose}
-          />
         </div>
       </DocumentTitle>
     );
