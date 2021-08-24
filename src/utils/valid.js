@@ -51,13 +51,13 @@ export function formatTime(value) {
     return '';
   }
   let d = new Date(value);
-  // let year = d.getFullYear();
+  let year = d.getFullYear();
   let month = d.getMonth() + 1;
   let day = d.getDate() < 10 ? '0' + d.getDate() : '' + d.getDate();
   let hour = d.getHours() < 10 ? '0' + d.getHours() : '' + d.getHours();
-  // let minutes = d.getMinutes() < 10 ? '0' + d.getMinutes() : '' + d.getMinutes();
+  let minutes = d.getMinutes() < 10 ? '0' + d.getMinutes() : '' + d.getMinutes();
   // let seconds = d.getSeconds() < 10 ? '0' + d.getSeconds() : '' + d.getSeconds();
-  return  `${month}月${day}日 ${hour}时`;
+  return  `${year}-${month}-${day} ${hour}:${minutes}`;
 }
 
 export function formatHour(value) {
