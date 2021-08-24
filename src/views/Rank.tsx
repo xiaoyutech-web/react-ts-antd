@@ -3,8 +3,8 @@
 
 import * as React from "react";
 import DocumentTitle from "react-document-title";
-import { Column ,Line} from "@ant-design/charts";
-import { useState, useEffect } from 'react';
+import { Column, Line } from "@ant-design/charts";
+import { useState, useEffect } from "react";
 import {
   Drawer,
   Button,
@@ -22,7 +22,7 @@ import { ColumnsType } from "antd/es/table";
 import moment from "moment";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import "@/styles/home.less";
+import "@/styles/rank.less";
 import {
   queryTaskList,
   addTask,
@@ -489,7 +489,7 @@ class Rank extends React.Component<any, IState> {
       },
       {
         type: "美容洗护",
-        sales: 145,
+        sales: 100,
       },
       {
         type: "母婴用品",
@@ -507,8 +507,16 @@ class Rank extends React.Component<any, IState> {
         type: "家庭清洁",
         sales: 38,
       },
+      {
+        type: "家庭清洁2",
+        sales: 38,
+      },
+      {
+        type: "家庭清洁3",
+        sales: 38,
+      },
     ];
-    const config: any =  {
+    const config: any = {
       data: data,
       xField: "type",
       yField: "sales",
@@ -532,7 +540,7 @@ class Rank extends React.Component<any, IState> {
     };
     return (
       <DocumentTitle title={"排名"}>
-        <div className="home-container">
+        <div className="rank-container">
           <Header curActive={"/rank"} />
 
           <div className="content clearfix">
@@ -556,8 +564,15 @@ class Rank extends React.Component<any, IState> {
                 </Space>
               </div>
             </div>
-            <Column  style={{padding:50}} {...config} /> 
-          
+            <Column
+              style={{
+                autoFit: true,
+                margin:10,
+                height: 250, 
+              }}
+              {...config}
+            />
+
             <Table
               bordered
               rowKey={(record) => record.id}
