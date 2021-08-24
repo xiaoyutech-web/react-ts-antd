@@ -68,6 +68,8 @@ class Audit extends React.Component<any> {
                 fieldNames={{ label: "name", value: "code", children: "items" }}
                 placeholder="请选择"
               />
+              <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品投票得分： </span>
+              <InputNumber min={0} placeholder="默认0" />
             </div>
           </div>
           <div className="content">
