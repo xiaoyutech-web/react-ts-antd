@@ -1,4 +1,4 @@
- /* 描述: 首页模板
+ /* 描述: 产品评审
  */
 
 import * as React from 'react';
@@ -506,9 +506,9 @@ class Audit extends React.Component<any, IState> {
         const { Option } = Select;
 
         return (
-            <DocumentTitle title={'首页'}>
+            <DocumentTitle title={'产品评审'}>
                 <div className="home-container">
-                    <Header curActive={'active'} />
+                    <Header curActive={'audit'} />
 
                     <div className="content clearfix">
                         <div className="list">

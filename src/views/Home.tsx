@@ -588,7 +588,7 @@ class Home extends React.Component<any, IState> {
     return (
       <DocumentTitle title={"首页"}>
         <div className="home-content">
-          <Header curActive={"active"} />
+          <Header curActive={"/"} />
 
           <div className="content clearfix">
             <Descriptions title="个人信息" column={1} bordered>

@@ -183,10 +183,10 @@ const Header = (props: any) => {
                             <a href="/" rel="noopener noreferrer" className={ curActive }>首页</a>
                         </li>
                         <li>
-                            <a href="/audit" target="/audit" rel="noopener noreferrer">产品评审</a>
+                            <a href="/audit" target="_self" rel="noopener noreferrer"  className={ curActive }>产品评审</a>
                         </li>
                         <li>
-                            <a href="/rank" target="/rank" rel="noopener noreferrer">排名</a>
+                            <a href="/rank" target="_self" rel="noopener noreferrer"  >排名</a>
                         </li>
                       </ul>
                 </div>
