@@ -508,7 +508,7 @@ class Rank extends React.Component<any, IState> {
         return (
             <DocumentTitle title={'首页'}>
                 <div className="home-container">
-                    <Header curActive={'active'} />
+                    <Header curActive={'/rank'} />
 
                     <div className="content clearfix">
                         <div className="list">

@@ -508,7 +508,7 @@ class Audit extends React.Component<any, IState> {
         return (
             <DocumentTitle title={'产品评审'}>
                 <div className="home-container">
-                    <Header curActive={'audit'} />
+                    <Header curActive={'/audit'} />
 
                     <div className="content clearfix">
                         <div className="list">
