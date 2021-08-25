@@ -9,7 +9,12 @@ export function loginUser(data) {
     data,
   });
 }
-
+export function logoutUser() {
+  return network({
+    url: `/logout`,
+    method: "get",
+  });
+}
 // 注册
 export function registerUser(data) {
   return network({

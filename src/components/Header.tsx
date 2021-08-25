@@ -10,7 +10,7 @@ import { DownOutlined } from '@ant-design/icons';
 import logo from '@/assets/logo_head.png';
 import avatar from '@/assets/avatar.jpg';
 import '@/styles/header.less';
-import { resetPwd } from '@/utils/api';
+import { resetPwd ,logoutUser} from '@/utils/api';
 import { validPass } from '@/utils/valid';
 
 interface Values {
@@ -162,6 +162,7 @@ const Header = (props: any) => {
         if (e.key === '1') {
             setVisible(true);
         } else {
+            logoutUser();
             store.dispatch(logout());
         }
     };
