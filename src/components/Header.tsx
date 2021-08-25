@@ -193,7 +193,7 @@ const Header = (props: any) => {
 
                 <Dropdown overlay={ menu }>
                     <a className="dropdown-link" href="/#" onClick={ e => e.preventDefault() }>
-                        <span className="username">{ (store.getState() as any).user.data.userData.username }</span>
+                         <span className="username">{ (store.getState() as any).user.data.name }</span>
                         <img className="avatar" src={ avatar } alt="" />
                         <DownOutlined />
                     </a>

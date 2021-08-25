@@ -9,7 +9,7 @@ import logo from "@/assets/logo_head.png";
 import '@/styles/login.less';
 import { validUserName, validPass } from '@/utils/valid';
 import DocumentTitle from 'react-document-title';
-
+import store from '@/store';
 interface IProps {
     login: any,
     register: any,
@@ -118,7 +118,7 @@ class Login extends React.Component<IProps, IState> {
         // 判断复选框是否被勾选，勾选则调用配置cookie方法
         if (checked) {
             // 传入账号名，密码，和保存天数3个参数
-            this.setCookie(formLogin.userName, formLogin.userPwd, 7);
+            this.setCookie(formLogin.userName, formLogin.userPwd, 1);
         } else {
             // 清空Cookie
             this.clearCookie();
@@ -180,10 +180,10 @@ class Login extends React.Component<IProps, IState> {
     // 登录/注册tab切换
     handleTab = (type: number) => {
         // console.log('type===',type);
-        this.setState({
-            typeView: type
-        })
-        this.clearInput();
+        // this.setState({
+        //     typeView: type
+        // })
+        // this.clearInput();
     }
 
     // 是否勾选记住密码

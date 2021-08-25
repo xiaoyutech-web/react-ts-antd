@@ -13,7 +13,8 @@ export function validPass(val) {
 }
 
 export function validUserName(name) {
-  return validEmail(name) || validPhone(name);
+  return /^[a-zA-Z\d]{4,30}$/.test(name);
+  // return validEmail(name) || validPhone(name);
 }
 
 export function validCode(val) {

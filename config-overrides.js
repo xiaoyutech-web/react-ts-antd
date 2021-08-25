@@ -54,6 +54,11 @@ const devServerConfig = () => config => {
         target: 'http://106.55.168.13:9000',
         changeOrigin: true,
         secure: false
+      },
+      '/quality/judge/': {
+        target: 'https://devaicall.komect.com',
+        changeOrigin: true,
+        secure: false
       }
     }
   };

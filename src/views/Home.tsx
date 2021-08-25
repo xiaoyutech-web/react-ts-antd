@@ -19,6 +19,7 @@ import {
 import { StarOutlined, StarTwoTone, PlusOutlined } from "@ant-design/icons";
 import { ColumnsType } from "antd/es/table";
 import moment from "moment";
+import store from "@/store";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import "@/styles/home.less";
@@ -64,7 +65,8 @@ class Home extends React.Component<any> {
   render() {
     const {} = this.state;
     const { Option } = Select;
-
+    const userdata = (store.getState() as any).user.data;
+    // (store.getState() as any).user.data.name
     return (
       <DocumentTitle title={"首页"}>
         <div className="home-container">
@@ -72,10 +74,14 @@ class Home extends React.Component<any> {
 
           <div className="content clearfix">
             <Descriptions title="个人信息" column={1} bordered>
-              <Descriptions.Item label="部门">融合通信系统部</Descriptions.Item>
-              <Descriptions.Item label="团队名">XX战队</Descriptions.Item>
-              <Descriptions.Item label="成员">
-                xx,xxxx,xx,xx,xx
+              <Descriptions.Item label="部门">
+                {userdata.department}
+              </Descriptions.Item>
+              <Descriptions.Item label="团队名">
+                {userdata.team}
+              </Descriptions.Item>
+              <Descriptions.Item label="成员名">
+                {userdata.name}
               </Descriptions.Item>
             </Descriptions>
           </div>

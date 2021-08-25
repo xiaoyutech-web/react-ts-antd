@@ -5,12 +5,12 @@ export const login = (username, password) => (dispatch) => {
     return new Promise((resolve, reject) => {
         loginUser({ username: username.trim(), password: password })
         .then(res => {
-            console.log('登录===', res)
+            console.log('auth===', res)
             if (res.code === 0) {
                 dispatch(saveUserInfo(res.data));
                 resolve(res);
             } else {
-                reject(res.msg);
+                reject(res.message);
             }
         })
     })
@@ -25,7 +25,7 @@ export const register = (username, password) => (dispatch) => {
                 dispatch(saveUserInfo(res.data));
                 resolve(res);
             } else {
-                reject(res.msg);
+                reject(res.message);
             }
         })
     })
