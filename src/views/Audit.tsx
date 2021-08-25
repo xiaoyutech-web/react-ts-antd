@@ -1,6 +1,5 @@
 /* 描述: 产品评审
  */
-
 import * as React from "react";
 import DocumentTitle from "react-document-title";
 import {
@@ -8,7 +7,7 @@ import {
   Input,
   Button,
   Radio,
-  Select,
+  message,
   Cascader,
   DatePicker,
   InputNumber,
@@ -23,10 +22,49 @@ import moment from "moment";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import "@/styles/audit.less";
-
+import { queryTeamList, queryProductList } from "@/utils/api";
 import { formatDate } from "@/utils/valid";
 
-class Audit extends React.Component<any> {
+interface Team {
+  value: string;
+  label: string;
+}
+
+interface IState {
+  total: number;
+  pageNo: number;
+  pageSize: number;
+  productVotedScore: number;
+
+  edit: boolean;
+  testCaseRunable: number;
+  testCaseAssertSuccess: number;
+  testCaseNoAssertSuccess: number;
+  testCaseAssertFailed: number;
+
+  testCaseExceptionFailed: number;
+  testCaseNumber: number;
+  productCodeLine: number;
+  testCaseQuality: number;
+  testCaseEfficiency: number;
+
+  testCaseLineCoverage: number;
+  testCaseBranchCoverage: number;
+  productQualityScore: number;
+
+  productFinalScore: number; //计算出
+
+  loading: boolean;
+  textBtn: string;
+
+  title: string;
+  visible: boolean;
+
+  status: any;
+  teamOptions: Team[];
+  productOptions: Team[];
+}
+class Audit extends React.Component<any, IState> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -36,19 +74,77 @@ class Audit extends React.Component<any> {
       loading: false,
       textBtn: "提交",
       title: "添加任务",
-      currentRowData: {
-        id: -1,
-        title: "",
-        date: "",
-        content: "",
-      },
       visible: false,
-      dataSource: [],
-      status: null, // 0：待办 1：完成 2：删除
+
+      status: null, // 0：新建 1：完成 2：删除
+
+      edit: true,
+      productVotedScore: 0,
+
+      testCaseRunable: 1,
+      testCaseAssertSuccess: 0,
+      testCaseNoAssertSuccess: 0,
+      testCaseAssertFailed: 0,
+
+      testCaseExceptionFailed: 0,
+      testCaseNumber: 0,
+      productCodeLine: 0,
+      testCaseQuality: 0,
+      testCaseEfficiency: 0,
+
+      testCaseLineCoverage: 0,
+      testCaseBranchCoverage: 0,
+      productQualityScore: 0,
+
+      productFinalScore: 0, //计算出
+      teamOptions: [],
+      productOptions: [],
     };
   }
+  onRunableChange = (e: any) => {
+    console.log("onRunableChange:" + e.target.value);
+    this.setState({
+      testCaseRunable: e.target.value,
+    });
+  };
+  displayRender = (label: any) => {
+    return label[label.length - 1];
+  };
 
+  componentDidMount() {
+    console.log("componentDidMount===");
+    //当去当前评审状态
+    //如果没有评审过，那么进行新建
+    this.handleGetTeamList();
+    this.handleGetProductList();
+  }
+
+  handleGetTeamList = () => {
+    queryTeamList().then((res: any) => {
+      console.log("queryTeamList===", res);
+      if (res.code === 0) {
+        this.setState({
+          teamOptions: res.data.children,
+        });
+      } else {
+        message.error(res.message);
+      }
+    });
+  };
+  handleGetProductList = () => {
+    queryProductList().then((res: any) => {
+      console.log("queryProductList===", res);
+      if (res.code === 0) {
+        this.setState({
+          productOptions: res.data.children,
+        });
+      } else {
+        message.error(res.message);
+      }
+    });
+  };
   render() {
+    const { teamOptions, productOptions, testCaseRunable } = this.state;
     return (
       <DocumentTitle title={"产品评审"}>
         <div className="audit-container">
@@ -60,16 +156,30 @@ class Audit extends React.Component<any> {
             <div className="item">
               参赛团队：
               <Cascader
-                fieldNames={{ label: "name", value: "code", children: "items" }}
+                options={teamOptions}
+                expandTrigger="hover"
+                // displayRender={this.displayRender}
+                fieldNames={{
+                  label: "label",
+                  value: "value",
+                  children: "children",
+                }}
                 placeholder="请选择"
               />
               <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品/模块： </span>
               <Cascader
-                fieldNames={{ label: "name", value: "code", children: "items" }}
+                options={productOptions}
+                expandTrigger="hover"
+                // displayRender={this.displayRender}
+                fieldNames={{
+                  label: "label",
+                  value: "value",
+                  children: "children",
+                }}
                 placeholder="请选择"
               />
               <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品投票得分： </span>
-              <InputNumber min={0} placeholder="默认0" />
+              <InputNumber min={0} max={100} placeholder="0~100" />
             </div>
           </div>
           <div className="content">
@@ -82,11 +192,13 @@ class Audit extends React.Component<any> {
               layout="horizontal"
               size="small"
             >
-              <Form.Item label="运行结果" name="size" initialValue={1}>
-                <Radio.Group>
-                  <Radio value={1} defaultChecked>
-                    成功
-                  </Radio>
+              <Form.Item
+                label="运行结果"
+                name="size"
+                initialValue={testCaseRunable}
+              >
+                <Radio.Group onChange={this.onRunableChange}>
+                  <Radio value={1}>成功</Radio>
                   <Radio value={0}>失败</Radio>
                 </Radio.Group>
               </Form.Item>
@@ -99,7 +211,11 @@ class Audit extends React.Component<any> {
                   }}
                   name="sucess_assert"
                 >
-                  <InputNumber min={0} placeholder="默认0" />
+                  <InputNumber
+                    disabled={testCaseRunable === 0}
+                    min={0}
+                    placeholder="默认0"
+                  />
                 </Form.Item>
                 <Form.Item
                   style={{
@@ -111,7 +227,11 @@ class Audit extends React.Component<any> {
                   name="sucess_no_assert"
                   label="无断言但成功："
                 >
-                  <InputNumber min={0} placeholder="默认0" />
+                  <InputNumber
+                    disabled={testCaseRunable === 0}
+                    min={0}
+                    placeholder="默认0"
+                  />
                 </Form.Item>
                 <Form.Item
                   style={{
@@ -123,7 +243,11 @@ class Audit extends React.Component<any> {
                   name="failed_assert"
                   label="有断言但断言失败："
                 >
-                  <InputNumber min={0} placeholder="默认0" />
+                  <InputNumber
+                    disabled={testCaseRunable === 0}
+                    min={0}
+                    placeholder="默认0"
+                  />
                 </Form.Item>
               </Form.Item>
               <Form.Item label="异常失败：">

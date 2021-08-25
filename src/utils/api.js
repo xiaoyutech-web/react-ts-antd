@@ -9,6 +9,7 @@ export function loginUser(data) {
     data,
   });
 }
+//退出登录
 export function logoutUser() {
   return network({
     url: `/logout`,
@@ -30,6 +31,22 @@ export function resetPwd(data) {
     url: `/resetPwd`,
     method: "post",
     data,
+  });
+}
+//查询团队列表
+export function queryTeamList(params) {
+  return network({
+    url: `/team/list`,
+    method: "get",
+    params,
+  });
+}
+//查询产品/模块列表
+export function queryProductList(params) {
+  return network({
+    url: `/product/list`,
+    method: "get",
+    params,
   });
 }
 
