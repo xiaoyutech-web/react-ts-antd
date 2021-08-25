@@ -9,7 +9,7 @@ import {
   Radio,
   message,
   Cascader,
-  DatePicker,
+  Affix,
   InputNumber,
   TreeSelect,
   Switch,
@@ -124,7 +124,7 @@ class Audit extends React.Component<any, IState> {
       console.log("queryTeamList===", res);
       if (res.code === 0) {
         this.setState({
-          teamOptions: res.data.children,
+          teamOptions: res.data,
         });
       } else {
         message.error(res.message);
@@ -136,7 +136,7 @@ class Audit extends React.Component<any, IState> {
       console.log("queryProductList===", res);
       if (res.code === 0) {
         this.setState({
-          productOptions: res.data.children,
+          productOptions: res.data,
         });
       } else {
         message.error(res.message);
@@ -148,147 +148,158 @@ class Audit extends React.Component<any, IState> {
     return (
       <DocumentTitle title={"产品评审"}>
         <div className="audit-container">
+
           <Header curActive={"/audit"} />
           <div className="content">
-            <Divider orientation="left" style={{ fontWeight: "bold" }}>
-              参赛者信息
-            </Divider>
-            <div className="item">
-              参赛团队：
-              <Cascader
-                options={teamOptions}
-                expandTrigger="hover"
-                // displayRender={this.displayRender}
-                fieldNames={{
-                  label: "label",
-                  value: "value",
-                  children: "children",
-                }}
-                placeholder="请选择"
-              />
-              <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品/模块： </span>
-              <Cascader
-                options={productOptions}
-                expandTrigger="hover"
-                // displayRender={this.displayRender}
-                fieldNames={{
-                  label: "label",
-                  value: "value",
-                  children: "children",
-                }}
-                placeholder="请选择"
-              />
-              <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品投票得分： </span>
-              <InputNumber min={0} max={100} placeholder="0~100" />
+            <div>
+              <Divider orientation="left" style={{ fontWeight: "bold" }}>
+                参赛者信息
+              </Divider>
+              <div className="item">
+                参赛团队：
+                <Cascader
+                  options={teamOptions}
+                  expandTrigger="hover"
+                  // displayRender={this.displayRender}
+                  fieldNames={{
+                    label: "label",
+                    value: "value",
+                    children: "children",
+                  }}
+                  placeholder="请选择"
+                />
+                <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品/模块： </span>
+                <Cascader
+                  options={productOptions}
+                  expandTrigger="hover"
+                  // displayRender={this.displayRender}
+                  fieldNames={{
+                    label: "label",
+                    value: "value",
+                    children: "children",
+                  }}
+                  placeholder="请选择"
+                />
+                <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品投票得分： </span>
+                <InputNumber min={0} max={100} placeholder="0~100" />
+              </div>
+            </div>
+            <div>
+              <Divider orientation="left" style={{ fontWeight: "bold" }}>
+                用例
+              </Divider>
+              <Form
+                labelCol={{ span: 4 }}
+                wrapperCol={{ span: 10 }}
+                layout="horizontal"
+                size="small"
+              >
+                <Form.Item
+                  label="运行结果"
+                  name="size"
+                  initialValue={testCaseRunable}
+                >
+                  <Radio.Group onChange={this.onRunableChange}>
+                    <Radio value={1}>成功</Radio>
+                    <Radio value={0}>失败</Radio>
+                  </Radio.Group>
+                </Form.Item>
+                <Form.Item label="有断言且成功：">
+                  <Form.Item
+                    style={{
+                      display: "inline-flex",
+                      marginBottom: "0",
+                      width: "calc(25% - 4px)",
+                    }}
+                    name="sucess_assert"
+                  >
+                    <InputNumber
+                      disabled={testCaseRunable === 0}
+                      min={0}
+                      placeholder="默认0"
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    style={{
+                      display: "inline-flex",
+                      marginBottom: "0",
+                      width: "calc(35% - 4px)",
+                      marginLeft: "0px",
+                    }}
+                    name="sucess_no_assert"
+                    label="无断言但成功："
+                  >
+                    <InputNumber
+                      disabled={testCaseRunable === 0}
+                      min={0}
+                      placeholder="默认0"
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    style={{
+                      display: "inline-flex",
+                      marginBottom: "0",
+                      width: "calc(35% - 4px)",
+                      marginLeft: "8px",
+                    }}
+                    name="failed_assert"
+                    label="有断言但断言失败："
+                  >
+                    <InputNumber
+                      disabled={testCaseRunable === 0}
+                      min={0}
+                      placeholder="默认0"
+                    />
+                  </Form.Item>
+                </Form.Item>
+                <Form.Item label="异常失败：">
+                  <InputNumber min={0} />
+                </Form.Item>{" "}
+                <Form.Item label="总个数：">
+                  <InputNumber min={0} />
+                </Form.Item>{" "}
+                <Form.Item label="代码行数：">
+                  <InputNumber min={0} />
+                </Form.Item>{" "}
+                <Form.Item label="质量评分：">
+                  <InputNumber min={0} max={100} placeholder="0~100" />
+                </Form.Item>{" "}
+                <Form.Item label="有效性评分：">
+                  <InputNumber min={0} max={100} placeholder="0~100" />
+                </Form.Item>
+              </Form>
+            </div>
+            <div>
+              <Divider orientation="left" style={{ fontWeight: "bold" }}>
+                覆盖率
+              </Divider>
+              <Form
+                labelCol={{ span: 4 }}
+                wrapperCol={{ span: 14 }}
+                layout="horizontal"
+                size="small"
+              >
+                <Form.Item label="行覆盖率：">
+                  <InputNumber min={0} max={100} />%
+                </Form.Item>
+                <Form.Item label="分支覆盖率：">
+                  <InputNumber min={0} max={100} />%
+                </Form.Item>
+                <Form.Item label="产品质量评分：">
+                  <InputNumber min={0} max={100} placeholder="0~100" />
+                </Form.Item>
+              </Form>
             </div>
           </div>
-          <div className="content">
-            <Divider orientation="left" style={{ fontWeight: "bold" }}>
-              用例
-            </Divider>
-            <Form
-              labelCol={{ span: 4 }}
-              wrapperCol={{ span: 10 }}
-              layout="horizontal"
-              size="small"
-            >
-              <Form.Item
-                label="运行结果"
-                name="size"
-                initialValue={testCaseRunable}
-              >
-                <Radio.Group onChange={this.onRunableChange}>
-                  <Radio value={1}>成功</Radio>
-                  <Radio value={0}>失败</Radio>
-                </Radio.Group>
-              </Form.Item>
-              <Form.Item label="有断言且成功：">
-                <Form.Item
-                  style={{
-                    display: "inline-flex",
-                    marginBottom: "0",
-                    width: "calc(25% - 4px)",
-                  }}
-                  name="sucess_assert"
-                >
-                  <InputNumber
-                    disabled={testCaseRunable === 0}
-                    min={0}
-                    placeholder="默认0"
-                  />
-                </Form.Item>
-                <Form.Item
-                  style={{
-                    display: "inline-flex",
-                    marginBottom: "0",
-                    width: "calc(35% - 4px)",
-                    marginLeft: "0px",
-                  }}
-                  name="sucess_no_assert"
-                  label="无断言但成功："
-                >
-                  <InputNumber
-                    disabled={testCaseRunable === 0}
-                    min={0}
-                    placeholder="默认0"
-                  />
-                </Form.Item>
-                <Form.Item
-                  style={{
-                    display: "inline-flex",
-                    marginBottom: "0",
-                    width: "calc(35% - 4px)",
-                    marginLeft: "8px",
-                  }}
-                  name="failed_assert"
-                  label="有断言但断言失败："
-                >
-                  <InputNumber
-                    disabled={testCaseRunable === 0}
-                    min={0}
-                    placeholder="默认0"
-                  />
-                </Form.Item>
-              </Form.Item>
-              <Form.Item label="异常失败：">
-                <InputNumber min={0} />
-              </Form.Item>{" "}
-              <Form.Item label="总个数：">
-                <InputNumber min={0} />
-              </Form.Item>{" "}
-              <Form.Item label="代码行数：">
-                <InputNumber min={0} />
-              </Form.Item>{" "}
-              <Form.Item label="质量评分：">
-                <InputNumber min={0} max={100} placeholder="0~100" />
-              </Form.Item>{" "}
-              <Form.Item label="有效性评分：">
-                <InputNumber min={0} max={100} placeholder="0~100" />
-              </Form.Item>
-            </Form>
-          </div>
-          <div className="content">
-            <Divider orientation="left" style={{ fontWeight: "bold" }}>
-              覆盖率
-            </Divider>
-            <Form
-              labelCol={{ span: 4 }}
-              wrapperCol={{ span: 14 }}
-              layout="horizontal"
-              size="small"
-            >
-              <Form.Item label="行覆盖率：">
-                <InputNumber min={0} max={100} />%
-              </Form.Item>
-              <Form.Item label="分支覆盖率：">
-                <InputNumber min={0} max={100} />%
-              </Form.Item>
-              <Form.Item label="产品质量评分：">
-                <InputNumber min={0} max={100} placeholder="0~100" />
-              </Form.Item>
-            </Form>
-          </div>
+
           <Footer />
+          <Affix offsetBottom={70} onChange={(affixed) => console.log(affixed)}>
+            <div className="pannel">
+              <span>综合得分：90</span>
+              <span>总分：95</span>
+              <Button>提交</Button>
+            </div>
+          </Affix>
         </div>
       </DocumentTitle>
     );
