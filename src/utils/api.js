@@ -50,6 +50,35 @@ export function queryProductList(params) {
   });
 }
 
+//提交评分
+
+export function submitProductScore(data) {
+  return network({
+    url: `product/score/add`,
+    method: "post",
+    data,
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 任务列表
 export function queryTaskList(params) {
   return network({

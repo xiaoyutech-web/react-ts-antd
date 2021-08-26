@@ -22,9 +22,13 @@ import moment from "moment";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import "@/styles/audit.less";
-import { queryTeamList, queryProductList } from "@/utils/api";
-import { formatDate } from "@/utils/valid";
-
+import {
+  queryTeamList,
+  queryProductList,
+  submitProductScore,
+} from "@/utils/api";
+import { formatDate, isEmpty } from "@/utils/valid";
+import { FormInstance } from "antd/lib/form";
 interface Team {
   value: string;
   label: string;
@@ -34,24 +38,17 @@ interface IState {
   total: number;
   pageNo: number;
   pageSize: number;
-  productVotedScore: number;
 
+  did: string;
+  tid: string;
+  pdid: string;
+  pid: string;
+  mid: string;
   edit: boolean;
   testCaseRunable: number;
-  testCaseAssertSuccess: number;
-  testCaseNoAssertSuccess: number;
-  testCaseAssertFailed: number;
-
-  testCaseExceptionFailed: number;
-  testCaseNumber: number;
-  productCodeLine: number;
-  testCaseQuality: number;
-  testCaseEfficiency: number;
-
-  testCaseLineCoverage: number;
-  testCaseBranchCoverage: number;
-  productQualityScore: number;
-
+  productVotedScore: number;
+  testCaseDensity: number; //计算出
+  productOverallScore: number; //计算出
   productFinalScore: number; //计算出
 
   loading: boolean;
@@ -79,38 +76,87 @@ class Audit extends React.Component<any, IState> {
       status: null, // 0：新建 1：完成 2：删除
 
       edit: true,
-      productVotedScore: 0,
 
+      did: "",
+      tid: "",
+      pdid: "",
+      pid: "",
+      mid: "",
       testCaseRunable: 1,
-      testCaseAssertSuccess: 0,
-      testCaseNoAssertSuccess: 0,
-      testCaseAssertFailed: 0,
+      productVotedScore: 0.0,
 
-      testCaseExceptionFailed: 0,
-      testCaseNumber: 0,
-      productCodeLine: 0,
-      testCaseQuality: 0,
-      testCaseEfficiency: 0,
+      testCaseDensity: 0, //计算出
+      productOverallScore: 0.0, //计算出
+      productFinalScore: 0.0, //计算出
 
-      testCaseLineCoverage: 0,
-      testCaseBranchCoverage: 0,
-      productQualityScore: 0,
-
-      productFinalScore: 0, //计算出
       teamOptions: [],
       productOptions: [],
     };
   }
+  formRef = React.createRef<FormInstance>();
+  displayRender = (label: any) => {
+    return label[label.length - 1];
+  };
+  limitNumber = (value: any) => {
+    return !isNaN(value) ? String(value).replace(/^0(0+)|[^\d]+/g, "") : "";
+  };
   onRunableChange = (e: any) => {
-    console.log("onRunableChange:" + e.target.value);
+    // console.log("onRunableChange:" + e.target.value);
+    if (e.target.value === 0) {
+      //失败
+      this.formRef.current!.setFieldsValue({
+        testCaseAssertSuccess: 0,
+        testCaseNoAssertSuccess: 0,
+        testCaseAssertFailed: 0,
+      });
+    }
     this.setState({
       testCaseRunable: e.target.value,
     });
   };
-  displayRender = (label: any) => {
-    return label[label.length - 1];
-  };
 
+  onTeamChange = (label: any) => {
+    console.log("onTeamChange:" + label);
+    this.setState({
+      did: label[0],
+      tid: label[1],
+    });
+  };
+  onProductChange = (label: any) => {
+    console.log("onProductChange:" + label);
+    this.setState({
+      pdid: label[0],
+      pid: label[1],
+      mid: label[2],
+    });
+  };
+  onVotedScoreChange = (value: any) => {
+    console.log("onVotedScoreChange:" + value);
+    this.setState({
+      productVotedScore: value,
+    });
+    this.onInputChange();
+  };
+  autoCalValue = (values: any) => {
+    values.productVotedScore = this.state.productVotedScore;
+    values.testCastDensity = this.calTestCaseDensity(
+      values.testCaseAssertSuccess,
+      values.productCodeLine
+    );
+    values.productOverallScore = this.calProductOverallScore(values);
+    values.productFinalScore =
+      values.testCastDensity + values.productOverallScore;
+  };
+  //刷新得分情况
+  onInputChange = () => {
+    let values = this.formRef.current!.getFieldsValue();
+    console.log("onInputChange:" + values);
+    this.autoCalValue(values);
+    this.setState({
+      productOverallScore: values.productOverallScore,
+      productFinalScore: values.productFinalScore,
+    });
+  };
   componentDidMount() {
     console.log("componentDidMount===");
     //当去当前评审状态
@@ -143,12 +189,64 @@ class Audit extends React.Component<any, IState> {
       }
     });
   };
+  calTestCaseDensity = (testCaseAssertSuccess: any, productCodeLine: any) => {
+    if (isEmpty(productCodeLine) || productCodeLine === 0) {
+      return 0;
+    }
+    if (isEmpty(testCaseAssertSuccess)) {
+      return 0;
+    }
+    return (testCaseAssertSuccess * 1000) / productCodeLine; // 返回2位小数
+  };
+  calProductOverallScore = (values: any) => {
+    let sum = 0;
+    if (!isEmpty(values.testCaseQuality)) {
+      sum += values.testCaseQuality * 0.2;
+    }
+    if (!isEmpty(values.testCaseEfficiency)) {
+      sum += values.testCaseEfficiency * 0.1;
+    }
+    sum += values.testCastDensity * 0.3;
+    if (!isEmpty(values.testCaseLineCoverage)) {
+      sum += values.testCaseLineCoverage * 0.2;
+    }
+    if (!isEmpty(values.testCaseBranchCoverage)) {
+      sum += values.testCaseBranchCoverage * 0.1;
+    }
+    if (!isEmpty(values.productQualityScore)) {
+      sum += values.productQualityScore * 0.1;
+    }
+    return sum; // 返回2位小数
+  };
+
+  onSubmit = () => {
+    if (isEmpty(this.state.tid) || isEmpty(this.state.mid)) {
+      message.error("请完善参赛团队/被评审产品模块信息");
+      return;
+    }
+    let values = this.formRef.current!.getFieldsValue();
+    values.did = this.state.did;
+    values.tid = this.state.tid;
+    values.pdid = this.state.pdid;
+    values.pid = this.state.pid;
+    values.mid = this.state.mid;
+    console.log("onSubmit values:===", values);
+    this.autoCalValue(values);
+    console.log("onSubmit===", values);
+    submitProductScore(values).then((res: any) => {
+      console.log("submitProductScore===", res);
+      if (res.code === 0) {
+        message.success("提交成功");
+      } else {
+        message.error(res.message);
+      }
+    });
+  };
   render() {
     const { teamOptions, productOptions, testCaseRunable } = this.state;
     return (
       <DocumentTitle title={"产品评审"}>
         <div className="audit-container">
-
           <Header curActive={"/audit"} />
           <div className="content">
             <div>
@@ -158,6 +256,7 @@ class Audit extends React.Component<any, IState> {
               <div className="item">
                 参赛团队：
                 <Cascader
+                  onChange={this.onTeamChange}
                   options={teamOptions}
                   expandTrigger="hover"
                   // displayRender={this.displayRender}
@@ -170,6 +269,7 @@ class Audit extends React.Component<any, IState> {
                 />
                 <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品/模块： </span>
                 <Cascader
+                  onChange={this.onProductChange}
                   options={productOptions}
                   expandTrigger="hover"
                   // displayRender={this.displayRender}
@@ -181,7 +281,12 @@ class Audit extends React.Component<any, IState> {
                   placeholder="请选择"
                 />
                 <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品投票得分： </span>
-                <InputNumber min={0} max={100} placeholder="0~100" />
+                <InputNumber
+                  onChange={this.onVotedScoreChange}
+                  min={0}
+                  max={100}
+                  placeholder="0~100"
+                />
               </div>
             </div>
             <div>
@@ -189,6 +294,8 @@ class Audit extends React.Component<any, IState> {
                 用例
               </Divider>
               <Form
+                onFieldsChange={this.onInputChange}
+                ref={this.formRef}
                 labelCol={{ span: 4 }}
                 wrapperCol={{ span: 10 }}
                 layout="horizontal"
@@ -196,7 +303,7 @@ class Audit extends React.Component<any, IState> {
               >
                 <Form.Item
                   label="运行结果"
-                  name="size"
+                  name="testCaseRunable"
                   initialValue={testCaseRunable}
                 >
                   <Radio.Group onChange={this.onRunableChange}>
@@ -211,22 +318,24 @@ class Audit extends React.Component<any, IState> {
                       marginBottom: "0",
                       width: "calc(25% - 4px)",
                     }}
-                    name="sucess_assert"
+                    name="testCaseAssertSuccess"
                   >
                     <InputNumber
+                      formatter={this.limitNumber}
+                      parser={this.limitNumber}
                       disabled={testCaseRunable === 0}
                       min={0}
                       placeholder="默认0"
                     />
                   </Form.Item>
                   <Form.Item
+                    name="testCaseNoAssertSuccess"
                     style={{
                       display: "inline-flex",
                       marginBottom: "0",
                       width: "calc(35% - 4px)",
                       marginLeft: "0px",
                     }}
-                    name="sucess_no_assert"
                     label="无断言但成功："
                   >
                     <InputNumber
@@ -242,7 +351,7 @@ class Audit extends React.Component<any, IState> {
                       width: "calc(35% - 4px)",
                       marginLeft: "8px",
                     }}
-                    name="failed_assert"
+                    name="testCaseAssertFailed"
                     label="有断言但断言失败："
                   >
                     <InputNumber
@@ -252,40 +361,31 @@ class Audit extends React.Component<any, IState> {
                     />
                   </Form.Item>
                 </Form.Item>
-                <Form.Item label="异常失败：">
+                <Form.Item label="异常失败：" name="testCaseExceptionFailed">
                   <InputNumber min={0} />
                 </Form.Item>{" "}
-                <Form.Item label="总个数：">
+                <Form.Item label="总个数：" name="testCaseNumber">
                   <InputNumber min={0} />
                 </Form.Item>{" "}
-                <Form.Item label="代码行数：">
+                <Form.Item label="代码行数：" name="productCodeLine">
                   <InputNumber min={0} />
                 </Form.Item>{" "}
-                <Form.Item label="质量评分：">
+                <Form.Item label="质量评分：" name="testCaseQuality">
                   <InputNumber min={0} max={100} placeholder="0~100" />
                 </Form.Item>{" "}
-                <Form.Item label="有效性评分：">
+                <Form.Item label="有效性评分：" name="testCaseEfficiency">
                   <InputNumber min={0} max={100} placeholder="0~100" />
                 </Form.Item>
-              </Form>
-            </div>
-            <div>
-              <Divider orientation="left" style={{ fontWeight: "bold" }}>
-                覆盖率
-              </Divider>
-              <Form
-                labelCol={{ span: 4 }}
-                wrapperCol={{ span: 14 }}
-                layout="horizontal"
-                size="small"
-              >
-                <Form.Item label="行覆盖率：">
-                  <InputNumber min={0} max={100} />%
+                <Divider orientation="left" style={{ fontWeight: "bold" }}>
+                  覆盖率
+                </Divider>
+                <Form.Item name="testCaseLineCoverage" label="行覆盖率：">
+                  <InputNumber min={0} max={100}></InputNumber>
                 </Form.Item>
-                <Form.Item label="分支覆盖率：">
-                  <InputNumber min={0} max={100} />%
+                <Form.Item name="testCaseBranchCoverage" label="分支覆盖率：">
+                  <InputNumber min={0} max={100} />
                 </Form.Item>
-                <Form.Item label="产品质量评分：">
+                <Form.Item name="productQualityScore" label="产品质量评分：">
                   <InputNumber min={0} max={100} placeholder="0~100" />
                 </Form.Item>
               </Form>
@@ -295,9 +395,10 @@ class Audit extends React.Component<any, IState> {
           <Footer />
           <Affix offsetBottom={70} onChange={(affixed) => console.log(affixed)}>
             <div className="pannel">
-              <span>综合得分：90</span>
-              <span>总分：95</span>
-              <Button>提交</Button>
+              <span>投票得分：{this.state.productVotedScore}</span>
+              <span>综合得分：{this.state.productOverallScore}</span>
+              <span>总分：{this.state.productFinalScore}</span>
+              <Button onClick={this.onSubmit}>提交</Button>
             </div>
           </Affix>
         </div>
