@@ -1,3 +1,11 @@
+export function isEmpty(obj) {
+  if (typeof obj === 'undefined' || obj == null || obj === '') {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 export function validEmail(val) {
   return /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/.test(val);
 }
@@ -92,6 +100,7 @@ export function timeFromNow(value) {
 
 
 export default {
+  isEmpty,
   validEmail,
   validPhone,
   validUserName,
