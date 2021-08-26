@@ -23,6 +23,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import "@/styles/audit.less";
 import {
+  queryProductScoreList,
   queryTeamList,
   queryProductList,
   submitProductScore,
@@ -33,7 +34,24 @@ interface Team {
   value: string;
   label: string;
 }
-
+interface ProductScore {
+  testCaseRunable: number;
+  testCaseAssertSuccess: number;
+  testCaseNoAssertSuccess: number;
+  testCaseAssertFailed: number;
+  testCaseExceptionFailed: number;
+  testCaseNumber: number;
+  testCaseQuality: number;
+  testCaseEfficiency: number;
+  productCodeLine: number;
+  productDensity: number;
+  testCaseLineCoverage: number;
+  testCaseBranchCoverage: number;
+  productQualityScore: number;
+  productFinalScore: number;
+  productOverallScore: number;
+  productVotedScore: number;
+}
 interface IState {
   total: number;
   pageNo: number;
@@ -51,6 +69,7 @@ interface IState {
   productOverallScore: number; //计算出
   productFinalScore: number; //计算出
 
+  productScoreItem: ProductScore;
   loading: boolean;
   textBtn: string;
 
@@ -72,7 +91,24 @@ class Audit extends React.Component<any, IState> {
       textBtn: "提交",
       title: "添加任务",
       visible: false,
-
+      productScoreItem: {
+        testCaseRunable: 0,
+        testCaseAssertSuccess: 0,
+        testCaseNoAssertSuccess: 0,
+        testCaseAssertFailed: 0,
+        testCaseExceptionFailed: 0,
+        testCaseNumber: 0,
+        testCaseQuality: 0,
+        testCaseEfficiency: 0,
+        productCodeLine: 0,
+        productDensity: 0,
+        testCaseLineCoverage: 0,
+        testCaseBranchCoverage: 0,
+        productQualityScore: 0,
+        productFinalScore: 0,
+        productOverallScore: 0,
+        productVotedScore: 0,
+      },
       status: null, // 0：新建 1：完成 2：删除
 
       edit: true,
@@ -160,10 +196,40 @@ class Audit extends React.Component<any, IState> {
   componentDidMount() {
     console.log("componentDidMount===");
     //当去当前评审状态
-    //如果没有评审过，那么进行新建
-    this.handleGetTeamList();
-    this.handleGetProductList();
+    this.handleGetProductInfo();
   }
+
+  // 获取任务列表数据
+  handleGetProductInfo = () => {
+    queryProductScoreList()
+      .then((res: any) => {
+        console.log("queryProductScoreList===", res);
+        this.setState({
+          loading: false,
+        });
+
+        if (res.code === 0) {
+          if (res.data.size === 1) {
+            //如果没有评审过，那么进行新建
+            this.setState({
+              edit: true,
+            });
+            this.handleGetTeamList();
+            this.handleGetProductList();
+          } else {
+            //有评审，展示数据
+            this.setState({
+              edit: false,
+            });
+          }
+        }
+      })
+      .catch(() => {
+        this.setState({
+          loading: false,
+        });
+      });
+  };
 
   handleGetTeamList = () => {
     queryTeamList().then((res: any) => {
@@ -242,156 +308,264 @@ class Audit extends React.Component<any, IState> {
       }
     });
   };
+
   render() {
-    const { teamOptions, productOptions, testCaseRunable } = this.state;
+    const {
+      teamOptions,
+      productOptions,
+      testCaseRunable,
+      edit,
+      productScoreItem,
+    } = this.state;
+
+    const info = (
+      <div className="content">
+        <div>
+          <Divider orientation="left" style={{ fontWeight: "bold" }}>
+            参赛者信息
+          </Divider>
+          <div className="item">
+            参赛团队：
+            {productScoreItem.testCaseNoAssertSuccess}
+            <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品/模块： </span>
+            {productScoreItem.testCaseNoAssertSuccess}
+            <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品投票得分： </span>
+            {productScoreItem.testCaseNoAssertSuccess}
+          </div>
+        </div>
+        <div>
+          <Divider orientation="left" style={{ fontWeight: "bold" }}>
+            用例
+          </Divider>
+          <Form
+            onFieldsChange={this.onInputChange}
+            ref={this.formRef}
+            labelCol={{ span: 4 }}
+            wrapperCol={{ span: 10 }}
+            layout="horizontal"
+            size="small"
+          >
+            <Form.Item label="运行结果" name="testCaseRunable">
+              {productScoreItem.testCaseRunable === 1 ? "成功" : "失败"}
+            </Form.Item>
+            <Form.Item label="有断言且成功：">
+              <Form.Item
+                style={{
+                  display: "inline-flex",
+                  marginBottom: "0",
+                  width: "calc(25% - 4px)",
+                }}
+                name="testCaseAssertSuccess"
+              >
+                {productScoreItem.testCaseAssertSuccess}
+              </Form.Item>
+              <Form.Item
+                name="testCaseNoAssertSuccess"
+                style={{
+                  display: "inline-flex",
+                  marginBottom: "0",
+                  width: "calc(35% - 4px)",
+                  marginLeft: "0px",
+                }}
+                label="无断言但成功："
+              >
+                {productScoreItem.testCaseNoAssertSuccess}
+              </Form.Item>
+              <Form.Item
+                style={{
+                  display: "inline-flex",
+                  marginBottom: "0",
+                  width: "calc(35% - 4px)",
+                  marginLeft: "8px",
+                }}
+                name="testCaseAssertFailed"
+                label="有断言但断言失败："
+              >
+                {productScoreItem.testCaseAssertFailed}
+              </Form.Item>
+            </Form.Item>
+            <Form.Item label="异常失败：" name="testCaseExceptionFailed">
+              {productScoreItem.testCaseExceptionFailed}
+            </Form.Item>{" "}
+            <Form.Item label="总个数：" name="testCaseNumber">
+              {productScoreItem.testCaseNumber}
+            </Form.Item>{" "}
+            <Form.Item label="代码行数：" name="productCodeLine">
+              {productScoreItem.productCodeLine}
+            </Form.Item>{" "}
+            <Form.Item label="质量评分：" name="testCaseQuality">
+              {productScoreItem.testCaseQuality}
+            </Form.Item>{" "}
+            <Form.Item label="有效性评分：" name="testCaseEfficiency">
+              {productScoreItem.testCaseEfficiency}
+            </Form.Item>
+            <Divider orientation="left" style={{ fontWeight: "bold" }}>
+              覆盖率
+            </Divider>
+            <Form.Item name="testCaseLineCoverage" label="行覆盖率：">
+              {productScoreItem.testCaseLineCoverage}
+            </Form.Item>
+            <Form.Item name="testCaseBranchCoverage" label="分支覆盖率：">
+              {productScoreItem.testCaseBranchCoverage}
+            </Form.Item>
+            <Form.Item name="productQualityScore" label="产品质量评分：">
+              {productScoreItem.productQualityScore}
+            </Form.Item>
+          </Form>
+        </div>
+      </div>
+    );
+    const editInfo = (
+      <div className="content">
+        <div>
+          <Divider orientation="left" style={{ fontWeight: "bold" }}>
+            参赛者信息
+          </Divider>
+          <div className="item">
+            参赛团队：
+            <Cascader
+              onChange={this.onTeamChange}
+              options={teamOptions}
+              expandTrigger="hover"
+              // displayRender={this.displayRender}
+              fieldNames={{
+                label: "label",
+                value: "value",
+                children: "children",
+              }}
+              placeholder="请选择"
+            />
+            <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品/模块： </span>
+            <Cascader
+              onChange={this.onProductChange}
+              options={productOptions}
+              expandTrigger="hover"
+              // displayRender={this.displayRender}
+              fieldNames={{
+                label: "label",
+                value: "value",
+                children: "children",
+              }}
+              placeholder="请选择"
+            />
+            <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品投票得分： </span>
+            <InputNumber
+              onChange={this.onVotedScoreChange}
+              min={0}
+              max={100}
+              placeholder="0~100"
+            />
+          </div>
+        </div>
+        <div>
+          <Divider orientation="left" style={{ fontWeight: "bold" }}>
+            用例
+          </Divider>
+          <Form
+            onFieldsChange={this.onInputChange}
+            ref={this.formRef}
+            labelCol={{ span: 4 }}
+            wrapperCol={{ span: 10 }}
+            layout="horizontal"
+            size="small"
+          >
+            <Form.Item
+              label="运行结果"
+              name="testCaseRunable"
+              initialValue={testCaseRunable}
+            >
+              <Radio.Group onChange={this.onRunableChange}>
+                <Radio value={1}>成功</Radio>
+                <Radio value={0}>失败</Radio>
+              </Radio.Group>
+            </Form.Item>
+            <Form.Item label="有断言且成功：">
+              <Form.Item
+                style={{
+                  display: "inline-flex",
+                  marginBottom: "0",
+                  width: "calc(25% - 4px)",
+                }}
+                name="testCaseAssertSuccess"
+              >
+                <InputNumber
+                  formatter={this.limitNumber}
+                  parser={this.limitNumber}
+                  disabled={testCaseRunable === 0}
+                  min={0}
+                  placeholder="默认0"
+                />
+              </Form.Item>
+              <Form.Item
+                name="testCaseNoAssertSuccess"
+                style={{
+                  display: "inline-flex",
+                  marginBottom: "0",
+                  width: "calc(35% - 4px)",
+                  marginLeft: "0px",
+                }}
+                label="无断言但成功："
+              >
+                <InputNumber
+                  disabled={testCaseRunable === 0}
+                  min={0}
+                  placeholder="默认0"
+                />
+              </Form.Item>
+              <Form.Item
+                style={{
+                  display: "inline-flex",
+                  marginBottom: "0",
+                  width: "calc(35% - 4px)",
+                  marginLeft: "8px",
+                }}
+                name="testCaseAssertFailed"
+                label="有断言但断言失败："
+              >
+                <InputNumber
+                  disabled={testCaseRunable === 0}
+                  min={0}
+                  placeholder="默认0"
+                />
+              </Form.Item>
+            </Form.Item>
+            <Form.Item label="异常失败：" name="testCaseExceptionFailed">
+              <InputNumber min={0} />
+            </Form.Item>{" "}
+            <Form.Item label="总个数：" name="testCaseNumber">
+              <InputNumber min={0} />
+            </Form.Item>{" "}
+            <Form.Item label="代码行数：" name="productCodeLine">
+              <InputNumber min={0} />
+            </Form.Item>{" "}
+            <Form.Item label="质量评分：" name="testCaseQuality">
+              <InputNumber min={0} max={100} placeholder="0~100" />
+            </Form.Item>{" "}
+            <Form.Item label="有效性评分：" name="testCaseEfficiency">
+              <InputNumber min={0} max={100} placeholder="0~100" />
+            </Form.Item>
+            <Divider orientation="left" style={{ fontWeight: "bold" }}>
+              覆盖率
+            </Divider>
+            <Form.Item name="testCaseLineCoverage" label="行覆盖率：">
+              <InputNumber min={0} max={100}></InputNumber>
+            </Form.Item>
+            <Form.Item name="testCaseBranchCoverage" label="分支覆盖率：">
+              <InputNumber min={0} max={100} />
+            </Form.Item>
+            <Form.Item name="productQualityScore" label="产品质量评分：">
+              <InputNumber min={0} max={100} placeholder="0~100" />
+            </Form.Item>
+          </Form>
+        </div>
+      </div>
+    );
+
     return (
       <DocumentTitle title={"产品评审"}>
         <div className="audit-container">
           <Header curActive={"/audit"} />
-          <div className="content">
-            <div>
-              <Divider orientation="left" style={{ fontWeight: "bold" }}>
-                参赛者信息
-              </Divider>
-              <div className="item">
-                参赛团队：
-                <Cascader
-                  onChange={this.onTeamChange}
-                  options={teamOptions}
-                  expandTrigger="hover"
-                  // displayRender={this.displayRender}
-                  fieldNames={{
-                    label: "label",
-                    value: "value",
-                    children: "children",
-                  }}
-                  placeholder="请选择"
-                />
-                <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品/模块： </span>
-                <Cascader
-                  onChange={this.onProductChange}
-                  options={productOptions}
-                  expandTrigger="hover"
-                  // displayRender={this.displayRender}
-                  fieldNames={{
-                    label: "label",
-                    value: "value",
-                    children: "children",
-                  }}
-                  placeholder="请选择"
-                />
-                <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品投票得分： </span>
-                <InputNumber
-                  onChange={this.onVotedScoreChange}
-                  min={0}
-                  max={100}
-                  placeholder="0~100"
-                />
-              </div>
-            </div>
-            <div>
-              <Divider orientation="left" style={{ fontWeight: "bold" }}>
-                用例
-              </Divider>
-              <Form
-                onFieldsChange={this.onInputChange}
-                ref={this.formRef}
-                labelCol={{ span: 4 }}
-                wrapperCol={{ span: 10 }}
-                layout="horizontal"
-                size="small"
-              >
-                <Form.Item
-                  label="运行结果"
-                  name="testCaseRunable"
-                  initialValue={testCaseRunable}
-                >
-                  <Radio.Group onChange={this.onRunableChange}>
-                    <Radio value={1}>成功</Radio>
-                    <Radio value={0}>失败</Radio>
-                  </Radio.Group>
-                </Form.Item>
-                <Form.Item label="有断言且成功：">
-                  <Form.Item
-                    style={{
-                      display: "inline-flex",
-                      marginBottom: "0",
-                      width: "calc(25% - 4px)",
-                    }}
-                    name="testCaseAssertSuccess"
-                  >
-                    <InputNumber
-                      formatter={this.limitNumber}
-                      parser={this.limitNumber}
-                      disabled={testCaseRunable === 0}
-                      min={0}
-                      placeholder="默认0"
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    name="testCaseNoAssertSuccess"
-                    style={{
-                      display: "inline-flex",
-                      marginBottom: "0",
-                      width: "calc(35% - 4px)",
-                      marginLeft: "0px",
-                    }}
-                    label="无断言但成功："
-                  >
-                    <InputNumber
-                      disabled={testCaseRunable === 0}
-                      min={0}
-                      placeholder="默认0"
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    style={{
-                      display: "inline-flex",
-                      marginBottom: "0",
-                      width: "calc(35% - 4px)",
-                      marginLeft: "8px",
-                    }}
-                    name="testCaseAssertFailed"
-                    label="有断言但断言失败："
-                  >
-                    <InputNumber
-                      disabled={testCaseRunable === 0}
-                      min={0}
-                      placeholder="默认0"
-                    />
-                  </Form.Item>
-                </Form.Item>
-                <Form.Item label="异常失败：" name="testCaseExceptionFailed">
-                  <InputNumber min={0} />
-                </Form.Item>{" "}
-                <Form.Item label="总个数：" name="testCaseNumber">
-                  <InputNumber min={0} />
-                </Form.Item>{" "}
-                <Form.Item label="代码行数：" name="productCodeLine">
-                  <InputNumber min={0} />
-                </Form.Item>{" "}
-                <Form.Item label="质量评分：" name="testCaseQuality">
-                  <InputNumber min={0} max={100} placeholder="0~100" />
-                </Form.Item>{" "}
-                <Form.Item label="有效性评分：" name="testCaseEfficiency">
-                  <InputNumber min={0} max={100} placeholder="0~100" />
-                </Form.Item>
-                <Divider orientation="left" style={{ fontWeight: "bold" }}>
-                  覆盖率
-                </Divider>
-                <Form.Item name="testCaseLineCoverage" label="行覆盖率：">
-                  <InputNumber min={0} max={100}></InputNumber>
-                </Form.Item>
-                <Form.Item name="testCaseBranchCoverage" label="分支覆盖率：">
-                  <InputNumber min={0} max={100} />
-                </Form.Item>
-                <Form.Item name="productQualityScore" label="产品质量评分：">
-                  <InputNumber min={0} max={100} placeholder="0~100" />
-                </Form.Item>
-              </Form>
-            </div>
-          </div>
-
+          {!edit ? info : editInfo}
           <Footer />
           <Affix offsetBottom={70} onChange={(affixed) => console.log(affixed)}>
             <div className="pannel">
