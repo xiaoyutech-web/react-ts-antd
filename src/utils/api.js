@@ -51,7 +51,6 @@ export function queryProductList(params) {
 }
 
 //提交评分
-
 export function submitProductScore(data) {
   return network({
     url: `product/score/add`,
@@ -60,7 +59,14 @@ export function submitProductScore(data) {
   });
 }
 
-
+//按分数排序获取产品列表
+export function queryProductScoreList(params) {
+  return network({
+    url: `product/score/list`,
+    method: "get",
+    params,
+  });
+}
 
 
 

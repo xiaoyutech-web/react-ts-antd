@@ -24,7 +24,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import "@/styles/rank.less";
 import {
-  queryTaskList,
+  queryProductScoreList,
   addTask,
   editTask,
   updateTaskStatus,
@@ -104,75 +104,43 @@ class Rank extends React.Component<any, IState> {
         },
         {
           title: "部门",
-          dataIndex: "title",
+          dataIndex: "department",
           width: 150,
-          key: "title",
-          render: (text: any, record: any, index: number) => {
-            const fav = this.state.dataSource[index].is_major;
-            const style = {
-              cursor: "pointer",
-              fontSize: "16px",
-            };
-
-            const icon =
-              fav === 0 ? (
-                <StarOutlined style={style} />
-              ) : (
-                <StarTwoTone style={style} twoToneColor="#f50" />
-              );
-
-            return (
-              <div>
-                <span onClick={() => this.toggleFav(record, index)}>
-                  {icon}
-                </span>{" "}
-                {record.title}
-              </div>
-            );
-          },
+          key: "department",
+        },
+        {
+          title: "团队",
+          dataIndex: "team",
+          width: 150,
+          key: "team",
         },
         {
           title: "被评审产品",
-          dataIndex: "content",
-          key: "content",
+          dataIndex: "product",
+          key: "product",
         },
         {
           title: "被评审模块",
-          dataIndex: "content",
-          key: "content",
+          dataIndex: "module",
+          key: "module",
         },
         {
           title: "产品质量综合得分",
-          dataIndex: "status",
-          key: "status",
+          dataIndex: "productOverallScore",
+          key: "productOverallScore",
           width: 150,
-          render: (text: any, record: any) => {
-            const txt =
-              record.status === 0 ? "0" : record.status === 1 ? "100" : "50";
-            return txt;
-          },
         },
         {
           title: "产品质量投票得分",
-          dataIndex: "status",
-          key: "status",
+          dataIndex: "productVotedScore",
+          key: "productVotedScore",
           width: 150,
-          render: (text: any, record: any) => {
-            const txt =
-              record.status === 0 ? "0" : record.status === 1 ? "100" : "50";
-            return txt;
-          },
         },
         {
           title: "总分",
-          dataIndex: "status",
-          key: "status",
+          dataIndex: "productFinalScore",
+          key: "productFinalScore",
           width: 150,
-          render: (text: any, record: any) => {
-            const txt =
-              record.status === 0 ? "0" : record.status === 1 ? "100" : "50";
-            return txt;
-          },
         },
         {
           title: "提交日期",
@@ -193,36 +161,6 @@ class Rank extends React.Component<any, IState> {
     console.log("componentWillUnmount===");
   }
 
-  // 重要或不重要
-  toggleFav = (record: any, index: number) => {
-    if (record.status === 2) {
-      message.error("数据已删除");
-    } else {
-      // is_major: 0:不重要 1:重要
-      let data = {
-        id: record.id,
-        is_major: this.state.dataSource[index].is_major === 0 ? 1 : 0,
-      };
-
-      updateMark(data).then((res: any) => {
-        console.log("操作标记===", res);
-        if (res.code === 0) {
-          this.setState(
-            {
-              pageNo: 1,
-            },
-            () => {
-              this.getTaskList();
-              message.success("更新标记成功");
-            }
-          );
-        } else {
-          message.error(res.msg);
-        }
-      });
-    }
-  };
-
   // 获取任务列表数据
   getTaskList = () => {
     const { pageNo, pageSize, status } = this.state;
@@ -230,23 +168,19 @@ class Rank extends React.Component<any, IState> {
       loading: true,
     });
 
-    let params = {
-      pageNo: pageNo,
-      pageSize: pageSize,
-      status: status,
-    };
+    let params = {};
 
-    queryTaskList(params)
+    queryProductScoreList(params)
       .then((res: any) => {
-        console.log("任务列表===", res);
+        console.log("列表===", res);
         this.setState({
           loading: false,
         });
 
         if (res.code === 0 && res.data) {
           this.setState({
-            dataSource: res.data.rows,
-            total: res.data.total,
+            dataSource: res.data,
+            total: res.data.size,
           });
         } else {
           this.setState({
@@ -260,92 +194,6 @@ class Rank extends React.Component<any, IState> {
           loading: false,
         });
       });
-  };
-
-  // 添加任务对话框
-  addTask = () => {
-    console.log("添加任务===");
-    this.setState({
-      title: "添加任务",
-      textBtn: "提交",
-      visible: true,
-      currentRowData: {
-        id: -1,
-        title: "",
-        date: "",
-        content: "",
-      },
-    });
-  };
-
-  // 编辑任务对话框
-  editTask = (record: any, index: number) => {
-    console.log("编辑任务===", record);
-    this.setState({
-      title: "编辑任务",
-      textBtn: "保存",
-      visible: true,
-      currentRowData: {
-        id: record.id,
-        title: record.title,
-        date: moment(record.gmt_expire),
-        content: record.content,
-      },
-    });
-  };
-
-  // 删除任务
-  removeTask = (id: number) => {
-    console.log("删除任务===");
-    let data = {
-      id: id,
-      status: 2,
-    };
-
-    deleteTask(data).then((res: any) => {
-      console.log("删除任务===", res);
-      if (res.code === 0) {
-        this.setState(
-          {
-            pageNo: 1,
-          },
-          () => {
-            this.getTaskList();
-            message.success("任务删除成功");
-          }
-        );
-      } else {
-        message.error(res.msg);
-      }
-    });
-  };
-
-  // 完成/待办任务
-  completeTask = (record: any) => {
-    console.log("完成/待办任务===");
-    let status = record.status === 0 ? 1 : record.status === 1 ? 0 : null;
-
-    let data = {
-      id: record.id,
-      status: status,
-    };
-
-    updateTaskStatus(data).then((res: any) => {
-      console.log("操作状态===", res);
-      if (res.code === 0) {
-        this.setState(
-          {
-            pageNo: 1,
-          },
-          () => {
-            this.getTaskList();
-            message.success("更新任务状态成功");
-          }
-        );
-      } else {
-        message.error(res.msg);
-      }
-    });
   };
 
   // 提交添加或编辑表单
@@ -474,52 +322,11 @@ class Rank extends React.Component<any, IState> {
       currentRowData,
     } = this.state;
     const { Option } = Select;
-    var data = [
-      {
-        type: "家具家电",
-        sales: 38,
-      },
-      {
-        type: "粮油副食",
-        sales: 52,
-      },
-      {
-        type: "生鲜水果",
-        sales: 61,
-      },
-      {
-        type: "美容洗护",
-        sales: 100,
-      },
-      {
-        type: "母婴用品",
-        sales: 48,
-      },
-      {
-        type: "进口食品",
-        sales: 38,
-      },
-      {
-        type: "食品饮料",
-        sales: 38,
-      },
-      {
-        type: "家庭清洁",
-        sales: 38,
-      },
-      {
-        type: "家庭清洁2",
-        sales: 38,
-      },
-      {
-        type: "家庭清洁3",
-        sales: 38,
-      },
-    ];
+
     const config: any = {
-      data: data,
-      xField: "type",
-      yField: "sales",
+      data: dataSource,
+      xField: "module",
+      yField: "productFinalScore",
       label: {
         position: "middle",
         style: {
@@ -534,8 +341,8 @@ class Rank extends React.Component<any, IState> {
         },
       },
       meta: {
-        type: { alias: "类别" },
-        sales: { alias: "销售额" },
+        product: { alias: "产品" },
+        productFinalScore: { alias: "总分" },
       },
     };
     return (
@@ -545,7 +352,7 @@ class Rank extends React.Component<any, IState> {
 
           <div className="content clearfix">
             <div className="list">
-              <h2>排名前十</h2>
+              <h2>排行榜</h2>
               <div className="list-right">
                 <Space size="middle">
                   <Select
@@ -558,7 +365,7 @@ class Rank extends React.Component<any, IState> {
                     <Option value="">全部</Option>
                     <Option value={0}>待办</Option>
                   </Select>
-                  <Button type="primary" size="large" onClick={this.addTask}>
+                  <Button type="primary" size="large">
                     <ExportOutlined /> 导出
                   </Button>
                 </Space>
@@ -567,8 +374,8 @@ class Rank extends React.Component<any, IState> {
             <Column
               style={{
                 autoFit: true,
-                margin:10,
-                height: 250, 
+                margin: 10,
+                height: 250,
               }}
               {...config}
             />
