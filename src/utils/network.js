@@ -42,17 +42,14 @@ service.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    debugger;
     console.log("error===", error);
     const { status } = error.response;
-
     if (status === 401 || status === 403) {
       store.dispatch(logout());
       message.error("token失效，或长时间未操作，请重新登录");
     } else {
       message.error("网络异常，请稍后再试");
     }
-
     return Promise.reject(error);
   }
 );

@@ -1,6 +1,8 @@
 /* 描述: 产品评审
  */
 import * as React from "react";
+import { FormInstance } from "antd/lib/form";
+import moment from "moment";
 import DocumentTitle from "react-document-title";
 import {
   Form,
@@ -18,7 +20,7 @@ import {
 
 import { StarOutlined, StarTwoTone, PlusOutlined } from "@ant-design/icons";
 import { ColumnsType } from "antd/es/table";
-import moment from "moment";
+
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import "@/styles/audit.less";
@@ -29,7 +31,7 @@ import {
   submitProductScore,
 } from "@/utils/api";
 import { formatDate, isEmpty } from "@/utils/valid";
-import { FormInstance } from "antd/lib/form";
+
 interface Team {
   value: string;
   label: string;
@@ -51,6 +53,11 @@ interface ProductScore {
   productFinalScore: number;
   productOverallScore: number;
   productVotedScore: number;
+  did: string;
+  tid: string;
+  pdid: string;
+  pid: string;
+  mid: string;
   department: string;
   pdepartment: string;
   team: string;
@@ -62,17 +69,17 @@ interface IState {
   pageNo: number;
   pageSize: number;
 
-  did: string;
-  tid: string;
-  pdid: string;
-  pid: string;
-  mid: string;
+  // did: string;
+  // tid: string;
+  // pdid: string;
+  // pid: string;
+  // mid: string;
   edit: boolean;
-  testCaseRunable: number;
-  productVotedScore: number;
-  testCaseDensity: number; //计算出
-  productOverallScore: number; //计算出
-  productFinalScore: number; //计算出
+  // testCaseRunable: number;
+  // productVotedScore: number;
+  // testCaseDensity: number; //计算出
+  // productOverallScore: number; //计算出
+  // productFinalScore: number; //计算出
 
   productScoreItem: ProductScore;
   loading: boolean;
@@ -113,6 +120,11 @@ class Audit extends React.Component<any, IState> {
         productFinalScore: 0,
         productOverallScore: 0,
         productVotedScore: 0,
+        did: "",
+        tid: "",
+        pdid: "",
+        pid: "",
+        mid: "",
         department: "--",
         pdepartment: "--",
         team: "--",
@@ -123,17 +135,17 @@ class Audit extends React.Component<any, IState> {
 
       edit: false,
 
-      did: "",
-      tid: "",
-      pdid: "",
-      pid: "",
-      mid: "",
-      testCaseRunable: 1,
-      productVotedScore: 0.0,
+      // did: "",
+      // tid: "",
+      // pdid: "",
+      // pid: "",
+      // mid: "",
+      // testCaseRunable: 1,
+      // productVotedScore: 0.0,
 
-      testCaseDensity: 0, //计算出
-      productOverallScore: 0.0, //计算出
-      productFinalScore: 0.0, //计算出
+      // testCaseDensity: 0, //计算出
+      // productOverallScore: 0.0, //计算出
+      // productFinalScore: 0.0, //计算出
 
       teamOptions: [],
       productOptions: [],
@@ -146,6 +158,71 @@ class Audit extends React.Component<any, IState> {
   limitNumber = (value: any) => {
     return !isNaN(value) ? String(value).replace(/^0(0+)|[^\d]+/g, "") : "";
   };
+  autoCalValue = (values: any, productVotedScore: any) => {
+    values.productVotedScore = productVotedScore;
+
+    values.testCaseDensity = this.calTestCaseDensity(
+      values.testCaseAssertSuccess,
+      values.productCodeLine
+    );
+    values.productOverallScore = this.calProductOverallScore(values);
+    values.productFinalScore =
+      values.productVotedScore + values.productOverallScore;
+  };
+
+  onTeamChange = (label: any) => {
+    console.log("onTeamChange:" + label);
+    let data = Object.assign({}, this.state.productScoreItem, {
+      did: label[0],
+      tid: label[1],
+    });
+    this.setState({
+      productScoreItem: data,
+    });
+  };
+  onProductChange = (label: any) => {
+    console.log("onProductChange:" + label);
+
+    let data = Object.assign({}, this.state.productScoreItem, {
+      pdid: label[0],
+      pid: label[1],
+      mid: label[2],
+    });
+    this.setState({
+      productScoreItem: data,
+    });
+  };
+  onVotedScoreChange = (value: any) => {
+    let values = Object.assign({}, this.state.productScoreItem, {
+      productVotedScore: value,
+    });
+    console.log("onVotedScoreChange:" + JSON.stringify(values));
+    this.autoCalValue(values, value);
+    console.log("onVotedScoreChange after cal:" + JSON.stringify(values));
+
+    let data = Object.assign({}, values, {
+      productOverallScore: values.productOverallScore,
+      productFinalScore: values.productFinalScore,
+    });
+    this.setState({
+      productScoreItem: data,
+    });
+  };
+
+  //刷新得分情况
+  onInputChange = () => {
+    let values = this.formRef.current!.getFieldsValue(); //
+    console.log("onInputChange:" + JSON.stringify(values));
+    this.autoCalValue(values, this.state.productScoreItem.productVotedScore);
+    console.log("onInputChange after cal:" + JSON.stringify(values));
+    let data = Object.assign({}, this.state.productScoreItem, {
+      productOverallScore: values.productOverallScore,
+      productFinalScore: values.productFinalScore,
+    });
+    this.setState({
+      productScoreItem: data,
+    });
+  };
   onRunableChange = (e: any) => {
     // console.log("onRunableChange:" + e.target.value);
     if (e.target.value === 0) {
@@ -156,57 +233,19 @@ class Audit extends React.Component<any, IState> {
         testCaseAssertFailed: 0,
       });
     }
-    this.setState({
+    let data = Object.assign({}, this.state.productScoreItem, {
       testCaseRunable: e.target.value,
     });
-  };
-
-  onTeamChange = (label: any) => {
-    console.log("onTeamChange:" + label);
     this.setState({
-      did: label[0],
-      tid: label[1],
-    });
-  };
-  onProductChange = (label: any) => {
-    console.log("onProductChange:" + label);
-    this.setState({
-      pdid: label[0],
-      pid: label[1],
-      mid: label[2],
-    });
-  };
-  onVotedScoreChange = (value: any) => {
-    console.log("onVotedScoreChange:" + value);
-    this.setState({
-      productVotedScore: value,
-    });
-    this.onInputChange();
-  };
-  autoCalValue = (values: any) => {
-    values.productVotedScore = this.state.productVotedScore;
-    values.testCaseDensity = this.calTestCaseDensity(
-      values.testCaseAssertSuccess,
-      values.productCodeLine
-    );
-    values.productOverallScore = this.calProductOverallScore(values);
-    values.productFinalScore =
-      values.productVotedScore + values.productOverallScore;
-  };
-  //刷新得分情况
-  onInputChange = () => {
-    let values = this.formRef.current!.getFieldsValue();
-    console.log("onInputChange:" + values);
-    this.autoCalValue(values);
-    this.setState({
-      productOverallScore: values.productOverallScore,
-      productFinalScore: values.productFinalScore,
+      productScoreItem: data,
     });
   };
   componentDidMount() {
     console.log("componentDidMount===");
     //当去当前评审状态
     this.handleGetProductScoreInfo();
+    this.handleGetTeamList();
+    this.handleGetProductList();
   }
 
   // 获取任务列表数据
@@ -223,7 +262,6 @@ class Audit extends React.Component<any, IState> {
         });
 
         if (res.code === 0) {
-          debugger;
           if (res.data.length === 1) {
             //有评审，展示数据
             this.setState({
@@ -235,8 +273,6 @@ class Audit extends React.Component<any, IState> {
             this.setState({
               edit: true,
             });
-            this.handleGetTeamList();
-            this.handleGetProductList();
           }
         }
       })
@@ -255,7 +291,9 @@ class Audit extends React.Component<any, IState> {
           teamOptions: res.data,
         });
       } else {
-        message.error(res.message);
+        if (!isEmpty(res.message)) {
+          message.error(res.message);
+        }
       }
     });
   };
@@ -267,7 +305,9 @@ class Audit extends React.Component<any, IState> {
           productOptions: res.data,
         });
       } else {
-        message.error(res.message);
+        if (!isEmpty(res.message)) {
+          message.error(res.message);
+        }
       }
     });
   };
@@ -332,18 +372,20 @@ class Audit extends React.Component<any, IState> {
     });
   };
   onSubmit = () => {
-    if (isEmpty(this.state.tid) || isEmpty(this.state.mid)) {
+    if (
+      isEmpty(this.state.productScoreItem.tid) ||
+      isEmpty(this.state.productScoreItem.mid)
+    ) {
       message.error("请完善参赛团队/被评审产品模块信息");
       return;
     }
     let values = this.formRef.current!.getFieldsValue();
-    values.did = this.state.did;
-    values.tid = this.state.tid;
-    values.pdid = this.state.pdid;
-    values.pid = this.state.pid;
-    values.mid = this.state.mid;
-    console.log("onSubmit values:===", values);
-    this.autoCalValue(values);
+    values.did = this.state.productScoreItem.did;
+    values.tid = this.state.productScoreItem.tid;
+    values.pdid = this.state.productScoreItem.pdid;
+    values.pid = this.state.productScoreItem.pid;
+    values.mid = this.state.productScoreItem.mid;
+    this.autoCalValue(values, this.state.productScoreItem.productVotedScore);
     console.log("onSubmit===", values);
     submitProductScore(values).then((res: any) => {
       console.log("submitProductScore===", res);
@@ -371,7 +413,7 @@ class Audit extends React.Component<any, IState> {
     const {
       teamOptions,
       productOptions,
-      testCaseRunable,
+
       edit,
       productScoreItem,
     } = this.state;
@@ -397,7 +439,6 @@ class Audit extends React.Component<any, IState> {
             用例
           </Divider>
           <Form
-            onFieldsChange={this.onInputChange}
             ref={this.formRef}
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 10 }}
@@ -482,6 +523,7 @@ class Audit extends React.Component<any, IState> {
               options={teamOptions}
               expandTrigger="hover"
               // displayRender={this.displayRender}
+              defaultValue={["zhejiang", "hangzhou", "xihu"]}
               fieldNames={{
                 label: "label",
                 value: "value",
@@ -507,7 +549,7 @@ class Audit extends React.Component<any, IState> {
               onChange={this.onVotedScoreChange}
               min={0}
               max={100}
-              name="productVotedScore"
+              defaultValue={productScoreItem.productVotedScore}
               placeholder="0~100"
             />
           </div>
@@ -527,7 +569,7 @@ class Audit extends React.Component<any, IState> {
             <Form.Item
               label="运行结果"
               name="testCaseRunable"
-              initialValue={testCaseRunable}
+              initialValue={productScoreItem.testCaseRunable}
             >
               <Radio.Group onChange={this.onRunableChange}>
                 <Radio value={1}>成功</Radio>
@@ -546,7 +588,7 @@ class Audit extends React.Component<any, IState> {
                 <InputNumber
                   formatter={this.limitNumber}
                   parser={this.limitNumber}
-                  disabled={testCaseRunable === 0}
+                  disabled={productScoreItem.testCaseRunable === 0}
                   min={0}
                   placeholder="默认0"
                 />
@@ -562,7 +604,7 @@ class Audit extends React.Component<any, IState> {
                 label="无断言但成功："
               >
                 <InputNumber
-                  disabled={testCaseRunable === 0}
+                  disabled={productScoreItem.testCaseRunable === 0}
                   min={0}
                   placeholder="默认0"
                 />
@@ -578,7 +620,7 @@ class Audit extends React.Component<any, IState> {
                 label="有断言但断言失败："
               >
                 <InputNumber
-                  disabled={testCaseRunable === 0}
+                  disabled={productScoreItem.testCaseRunable === 0}
                   min={0}
                   placeholder="默认0"
                 />
@@ -626,7 +668,7 @@ class Audit extends React.Component<any, IState> {
             <div className="pannel">
               <span>投票得分：{productScoreItem.productVotedScore}</span>
               <span>综合得分：{productScoreItem.productOverallScore}</span>
-              <span>(其中密度分分：{productScoreItem.testCaseDensity})</span>
+              <span>(其中密度分：{productScoreItem.testCaseDensity})</span>
               <span>总分：{productScoreItem.productFinalScore}</span>
               <Button onClick={edit ? this.onSubmit : this.onEdit}>
                 {edit ? "提交" : "编辑"}

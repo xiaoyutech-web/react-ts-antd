@@ -108,7 +108,7 @@ const Header = (props: any) => {
     const [visible, setVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const { curActive } = props;
-    console.log('props===', props)
+    // console.log('props===', props)
 
     const onOk = (values: Values) => {
         console.log('Received values of form: ', values);
