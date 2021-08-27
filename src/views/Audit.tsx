@@ -44,13 +44,18 @@ interface ProductScore {
   testCaseQuality: number;
   testCaseEfficiency: number;
   productCodeLine: number;
-  productDensity: number;
+  testCaseDensity: number;
   testCaseLineCoverage: number;
   testCaseBranchCoverage: number;
   productQualityScore: number;
   productFinalScore: number;
   productOverallScore: number;
   productVotedScore: number;
+  department: string;
+  pdepartment: string;
+  team: string;
+  product: string;
+  module: string;
 }
 interface IState {
   total: number;
@@ -92,7 +97,7 @@ class Audit extends React.Component<any, IState> {
       title: "添加任务",
       visible: false,
       productScoreItem: {
-        testCaseRunable: 0,
+        testCaseRunable: 1,
         testCaseAssertSuccess: 0,
         testCaseNoAssertSuccess: 0,
         testCaseAssertFailed: 0,
@@ -101,17 +106,22 @@ class Audit extends React.Component<any, IState> {
         testCaseQuality: 0,
         testCaseEfficiency: 0,
         productCodeLine: 0,
-        productDensity: 0,
+        testCaseDensity: 0,
         testCaseLineCoverage: 0,
         testCaseBranchCoverage: 0,
         productQualityScore: 0,
         productFinalScore: 0,
         productOverallScore: 0,
         productVotedScore: 0,
+        department: "--",
+        pdepartment: "--",
+        team: "--",
+        product: "--",
+        module: "--",
       },
       status: null, // 0：新建 1：完成 2：删除
 
-      edit: true,
+      edit: false,
 
       did: "",
       tid: "",
@@ -181,7 +191,7 @@ class Audit extends React.Component<any, IState> {
     );
     values.productOverallScore = this.calProductOverallScore(values);
     values.productFinalScore =
-      values.testCastDensity + values.productOverallScore;
+      values.productVotedScore + values.productOverallScore;
   };
   //刷新得分情况
   onInputChange = () => {
@@ -196,11 +206,11 @@ class Audit extends React.Component<any, IState> {
   componentDidMount() {
     console.log("componentDidMount===");
     //当去当前评审状态
-    this.handleGetProductInfo();
+    this.handleGetProductScoreInfo();
   }
 
   // 获取任务列表数据
-  handleGetProductInfo = () => {
+  handleGetProductScoreInfo = () => {
     queryProductScoreList()
       .then((res: any) => {
         console.log("queryProductScoreList===", res);
@@ -209,18 +219,19 @@ class Audit extends React.Component<any, IState> {
         });
 
         if (res.code === 0) {
-          if (res.data.size === 1) {
+          debugger;
+          if (res.data.length === 1) {
+            //有评审，展示数据
+            this.setState({
+              edit: false,
+            });
+          } else {
             //如果没有评审过，那么进行新建
             this.setState({
               edit: true,
             });
             this.handleGetTeamList();
             this.handleGetProductList();
-          } else {
-            //有评审，展示数据
-            this.setState({
-              edit: false,
-            });
           }
         }
       })
@@ -262,7 +273,7 @@ class Audit extends React.Component<any, IState> {
     if (isEmpty(testCaseAssertSuccess)) {
       return 0;
     }
-    return (testCaseAssertSuccess * 1000) / productCodeLine; // 返回2位小数
+    return testCaseAssertSuccess* 1000 / (productCodeLine ); // 返回2位小数
   };
   calProductOverallScore = (values: any) => {
     let sum = 0;
@@ -308,7 +319,15 @@ class Audit extends React.Component<any, IState> {
       }
     });
   };
-
+  result = () => {
+    if (this.state.productScoreItem.testCaseRunable === 1) {
+      return "成功";
+    } else if (this.state.productScoreItem.testCaseRunable === 0) {
+      return "失败";
+    } else {
+      return "--";
+    }
+  };
   render() {
     const {
       teamOptions,
@@ -326,11 +345,11 @@ class Audit extends React.Component<any, IState> {
           </Divider>
           <div className="item">
             参赛团队：
-            {productScoreItem.testCaseNoAssertSuccess}
+            {productScoreItem.team}
             <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品/模块： </span>
-            {productScoreItem.testCaseNoAssertSuccess}
+            {productScoreItem.product}
             <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品投票得分： </span>
-            {productScoreItem.testCaseNoAssertSuccess}
+            {productScoreItem.productVotedScore}
           </div>
         </div>
         <div>
@@ -345,9 +364,7 @@ class Audit extends React.Component<any, IState> {
             layout="horizontal"
             size="small"
           >
-            <Form.Item label="运行结果" name="testCaseRunable">
-              {productScoreItem.testCaseRunable === 1 ? "成功" : "失败"}
-            </Form.Item>
+            <Form.Item label="运行结果">{this.result()}</Form.Item>
             <Form.Item label="有断言且成功：">
               <Form.Item
                 style={{
@@ -355,12 +372,10 @@ class Audit extends React.Component<any, IState> {
                   marginBottom: "0",
                   width: "calc(25% - 4px)",
                 }}
-                name="testCaseAssertSuccess"
               >
                 {productScoreItem.testCaseAssertSuccess}
               </Form.Item>
               <Form.Item
-                name="testCaseNoAssertSuccess"
                 style={{
                   display: "inline-flex",
                   marginBottom: "0",
@@ -378,37 +393,36 @@ class Audit extends React.Component<any, IState> {
                   width: "calc(35% - 4px)",
                   marginLeft: "8px",
                 }}
-                name="testCaseAssertFailed"
                 label="有断言但断言失败："
               >
                 {productScoreItem.testCaseAssertFailed}
               </Form.Item>
             </Form.Item>
-            <Form.Item label="异常失败：" name="testCaseExceptionFailed">
+            <Form.Item label="异常失败：">
               {productScoreItem.testCaseExceptionFailed}
             </Form.Item>{" "}
-            <Form.Item label="总个数：" name="testCaseNumber">
+            <Form.Item label="总个数：">
               {productScoreItem.testCaseNumber}
             </Form.Item>{" "}
-            <Form.Item label="代码行数：" name="productCodeLine">
+            <Form.Item label="代码行数：">
               {productScoreItem.productCodeLine}
             </Form.Item>{" "}
-            <Form.Item label="质量评分：" name="testCaseQuality">
+            <Form.Item label="质量评分：">
               {productScoreItem.testCaseQuality}
             </Form.Item>{" "}
-            <Form.Item label="有效性评分：" name="testCaseEfficiency">
+            <Form.Item label="有效性评分：">
               {productScoreItem.testCaseEfficiency}
             </Form.Item>
             <Divider orientation="left" style={{ fontWeight: "bold" }}>
               覆盖率
             </Divider>
-            <Form.Item name="testCaseLineCoverage" label="行覆盖率：">
+            <Form.Item label="行覆盖率：">
               {productScoreItem.testCaseLineCoverage}
             </Form.Item>
-            <Form.Item name="testCaseBranchCoverage" label="分支覆盖率：">
+            <Form.Item label="分支覆盖率：">
               {productScoreItem.testCaseBranchCoverage}
             </Form.Item>
-            <Form.Item name="productQualityScore" label="产品质量评分：">
+            <Form.Item label="产品质量评分：">
               {productScoreItem.productQualityScore}
             </Form.Item>
           </Form>
@@ -567,14 +581,21 @@ class Audit extends React.Component<any, IState> {
           <Header curActive={"/audit"} />
           {!edit ? info : editInfo}
           <Footer />
-          <Affix offsetBottom={70} onChange={(affixed) => console.log(affixed)}>
-            <div className="pannel">
-              <span>投票得分：{this.state.productVotedScore}</span>
-              <span>综合得分：{this.state.productOverallScore}</span>
-              <span>总分：{this.state.productFinalScore}</span>
-              <Button onClick={this.onSubmit}>提交</Button>
-            </div>
-          </Affix>
+          {edit ? (
+            <Affix
+              offsetBottom={70}
+              onChange={(affixed) => console.log(affixed)}
+            >
+              <div className="pannel">
+                <span>投票得分：{this.state.productVotedScore}</span>
+                <span>综合得分：{this.state.productOverallScore}</span>
+                <span>总分：{this.state.productFinalScore}</span>
+                <Button onClick={this.onSubmit}>提交</Button>
+              </div>
+            </Affix>
+          ) : (
+            <div />
+          )}
         </div>
       </DocumentTitle>
     );

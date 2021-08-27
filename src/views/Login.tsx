@@ -51,11 +51,11 @@ class Login extends React.Component<IProps, IState> {
     }
 
     // 设置cookie
-    setCookie = (user_name: string, user_pwd: string, exdays: number) => {
+    setCookie = (user_name: string, user_pwd: string, exHours: number) => {
         // 获取时间
         let exdate = new Date(); 
         // 保存的天数
-        exdate.setTime(exdate.getTime() + 24 * 60 * 60 * 1000 * exdays); 
+        exdate.setTime(exdate.getTime() +   60 * 60 * 1000 * exHours); 
         // 字符串拼接cookie
         document.cookie = `userName=${user_name};path=/;expires=${exdate.toUTCString()}`;
         document.cookie = `userPwd=${user_pwd};path=/;expires=${exdate.toUTCString()}`;
