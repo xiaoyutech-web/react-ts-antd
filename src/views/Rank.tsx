@@ -103,16 +103,22 @@ class Rank extends React.Component<any, IState> {
           },
         },
         {
-          title: "部门",
+          title: "参赛部门",
           dataIndex: "department",
           width: 150,
           key: "department",
         },
         {
-          title: "团队",
+          title: "参赛团队",
           dataIndex: "team",
           width: 150,
           key: "team",
+        },
+        {
+          title: "被评审产品部门",
+          dataIndex: "pdepartment",
+          width: 150,
+          key: "pdepartment",
         },
         {
           title: "被评审产品",

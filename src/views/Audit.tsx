@@ -211,6 +211,10 @@ class Audit extends React.Component<any, IState> {
 
   // 获取任务列表数据
   handleGetProductScoreInfo = () => {
+    this.setState({
+      loading: true,
+    });
+
     queryProductScoreList()
       .then((res: any) => {
         console.log("queryProductScoreList===", res);
@@ -224,6 +228,7 @@ class Audit extends React.Component<any, IState> {
             //有评审，展示数据
             this.setState({
               edit: false,
+              productScoreItem: res.data[0],
             });
           } else {
             //如果没有评审过，那么进行新建
@@ -273,7 +278,7 @@ class Audit extends React.Component<any, IState> {
     if (isEmpty(testCaseAssertSuccess)) {
       return 0;
     }
-    return testCaseAssertSuccess* 1000 / (productCodeLine ); // 返回2位小数
+    return (testCaseAssertSuccess * 1000) / productCodeLine; // 返回2位小数
   };
   calProductOverallScore = (values: any) => {
     let sum = 0;
@@ -314,6 +319,10 @@ class Audit extends React.Component<any, IState> {
       console.log("submitProductScore===", res);
       if (res.code === 0) {
         message.success("提交成功");
+        this.setState({
+          edit: false,
+        });
+        this.handleGetProductScoreInfo();
       } else {
         message.error(res.message);
       }
@@ -345,9 +354,10 @@ class Audit extends React.Component<any, IState> {
           </Divider>
           <div className="item">
             参赛团队：
-            {productScoreItem.team}
+            {productScoreItem.department}/{productScoreItem.team}
             <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品/模块： </span>
-            {productScoreItem.product}
+            {productScoreItem.pdepartment}/{productScoreItem.product}/{" "}
+            {productScoreItem.module}
             <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品投票得分： </span>
             {productScoreItem.productVotedScore}
           </div>
