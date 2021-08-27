@@ -185,7 +185,7 @@ class Audit extends React.Component<any, IState> {
   };
   autoCalValue = (values: any) => {
     values.productVotedScore = this.state.productVotedScore;
-    values.testCastDensity = this.calTestCaseDensity(
+    values.testCaseDensity = this.calTestCaseDensity(
       values.testCaseAssertSuccess,
       values.productCodeLine
     );
@@ -288,7 +288,7 @@ class Audit extends React.Component<any, IState> {
     if (!isEmpty(values.testCaseEfficiency)) {
       sum += values.testCaseEfficiency * 0.1;
     }
-    sum += values.testCastDensity * 0.3;
+    sum += values.testCaseDensity * 0.3;
     if (!isEmpty(values.testCaseLineCoverage)) {
       sum += values.testCaseLineCoverage * 0.2;
     }
@@ -300,7 +300,37 @@ class Audit extends React.Component<any, IState> {
     }
     return sum; // 返回2位小数
   };
-
+  onEdit = () => {
+    this.formRef.current!.setFieldsValue({
+      testCaseRunable: this.state.productScoreItem.testCaseRunable,
+      testCaseAssertSuccess: this.state.productScoreItem.testCaseAssertSuccess,
+      testCaseNoAssertSuccess:
+        this.state.productScoreItem.testCaseNoAssertSuccess,
+      testCaseAssertFailed: this.state.productScoreItem.testCaseAssertFailed,
+      testCaseExceptionFailed:
+        this.state.productScoreItem.testCaseExceptionFailed,
+      testCaseNumber: this.state.productScoreItem.testCaseNumber,
+      testCaseQuality: this.state.productScoreItem.testCaseQuality,
+      testCaseEfficiency: this.state.productScoreItem.testCaseEfficiency,
+      productCodeLine: this.state.productScoreItem.productCodeLine,
+      testCaseDensity: this.state.productScoreItem.testCaseDensity,
+      testCaseLineCoverage: this.state.productScoreItem.testCaseLineCoverage,
+      testCaseBranchCoverage:
+        this.state.productScoreItem.testCaseBranchCoverage,
+      productQualityScore: this.state.productScoreItem.productQualityScore,
+      productFinalScore: this.state.productScoreItem.productFinalScore,
+      productOverallScore: this.state.productScoreItem.productOverallScore,
+      productVotedScore: this.state.productScoreItem.productVotedScore,
+      department: this.state.productScoreItem.department,
+      pdepartment: this.state.productScoreItem.pdepartment,
+      team: this.state.productScoreItem.team,
+      product: this.state.productScoreItem.product,
+      module: this.state.productScoreItem.module,
+    });
+    this.setState({
+      edit: true,
+    });
+  };
   onSubmit = () => {
     if (isEmpty(this.state.tid) || isEmpty(this.state.mid)) {
       message.error("请完善参赛团队/被评审产品模块信息");
@@ -477,6 +507,7 @@ class Audit extends React.Component<any, IState> {
               onChange={this.onVotedScoreChange}
               min={0}
               max={100}
+              name="productVotedScore"
               placeholder="0~100"
             />
           </div>
@@ -591,21 +622,17 @@ class Audit extends React.Component<any, IState> {
           <Header curActive={"/audit"} />
           {!edit ? info : editInfo}
           <Footer />
-          {edit ? (
-            <Affix
-              offsetBottom={70}
-              onChange={(affixed) => console.log(affixed)}
-            >
-              <div className="pannel">
-                <span>投票得分：{this.state.productVotedScore}</span>
-                <span>综合得分：{this.state.productOverallScore}</span>
-                <span>总分：{this.state.productFinalScore}</span>
-                <Button onClick={this.onSubmit}>提交</Button>
-              </div>
-            </Affix>
-          ) : (
-            <div />
-          )}
+          <Affix offsetBottom={70} onChange={(affixed) => console.log(affixed)}>
+            <div className="pannel">
+              <span>投票得分：{productScoreItem.productVotedScore}</span>
+              <span>综合得分：{productScoreItem.productOverallScore}</span>
+              <span>(其中密度分分：{productScoreItem.testCaseDensity})</span>
+              <span>总分：{productScoreItem.productFinalScore}</span>
+              <Button onClick={edit ? this.onSubmit : this.onEdit}>
+                {edit ? "提交" : "编辑"}
+              </Button>
+            </div>
+          </Affix>
         </div>
       </DocumentTitle>
     );
