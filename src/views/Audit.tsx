@@ -314,12 +314,14 @@ class Audit extends React.Component<any, IState> {
       values.productCodeLine
     );
     values.productOverallScore = this.calProductOverallScore(values);
-    values.productFinalScore = math.format(
-      math.add(
-        math.bignumber(values.productVotedScore),
-        math.bignumber(values.productOverallScore)
-      ),
-      { precision: precision }
+    values.productFinalScore = parseFloat(
+      math.format(
+        math.add(
+          math.bignumber(values.productVotedScore),
+          math.bignumber(values.productOverallScore)
+        ),
+        { precision: precision }
+      )
     );
   };
   calTestCaseDensity = (testCaseAssertSuccess: any, productCodeLine: any) => {
@@ -336,14 +338,17 @@ class Audit extends React.Component<any, IState> {
       ),
       { precision: precision }
     ); // 返回2位小数
-    console.log(0.1 + 0.2);
+    //  Math.round(0.222222,2);
     console.info(
       "testCaseDensity:" +
         testCaseDensity +
         "," +
-        (testCaseAssertSuccess * 1000) / productCodeLine
+        (testCaseAssertSuccess * 1000) / productCodeLine +
+        "," +
+        parseFloat(testCaseDensity)
     );
-    return testCaseDensity;
+
+    return parseFloat(testCaseDensity);
   };
   calProductOverallScore = (values: any) => {
     var sum = 0;
@@ -393,7 +398,7 @@ class Audit extends React.Component<any, IState> {
         .done();
       // sum += values.productQualityScore * 0.1;
     }
-    return math.format(sum, { precision: precision }); // 返回2位小数
+    return parseFloat(math.format(sum, { precision: precision })); // 返回2位小数
   };
   onEdit = () => {
     this.formRef.current!.setFieldsValue({
