@@ -1,6 +1,7 @@
 /* 描述: 产品评审
  */
 import * as React from "react";
+import * as math from "mathjs";
 import { FormInstance } from "antd/lib/form";
 import moment from "moment";
 import DocumentTitle from "react-document-title";
@@ -32,7 +33,7 @@ import {
   updateProductScore,
 } from "@/utils/api";
 import { formatDate, isEmpty } from "@/utils/valid";
-
+const precision = 4;
 interface Team {
   value: string;
   label: string;
@@ -162,17 +163,6 @@ class Audit extends React.Component<any, IState> {
   limitNumber = (value: any) => {
     return !isNaN(value) ? String(value).replace(/^0(0+)|[^\d]+/g, "") : "";
   };
-  autoCalValue = (values: any, productVotedScore: any) => {
-    values.productVotedScore = productVotedScore;
-
-    values.testCaseDensity = this.calTestCaseDensity(
-      values.testCaseAssertSuccess,
-      values.productCodeLine
-    );
-    values.productOverallScore = this.calProductOverallScore(values);
-    values.productFinalScore =
-      values.productVotedScore + values.productOverallScore;
-  };
 
   onTeamChange = (label: any) => {
     console.log("onTeamChange:" + label);
@@ -203,6 +193,7 @@ class Audit extends React.Component<any, IState> {
     this.autoCalValue(values, value);
     console.log("onVotedScoreChange after cal:" + JSON.stringify(values));
     let data = Object.assign({}, values, {
+      testCaseDensity: values.testCaseDensity,
       productOverallScore: values.productOverallScore,
       productFinalScore: values.productFinalScore,
     });
@@ -218,6 +209,7 @@ class Audit extends React.Component<any, IState> {
     this.autoCalValue(values, this.state.productScoreItem.productVotedScore);
     console.log("onInputChange after cal:" + JSON.stringify(values));
     let data = Object.assign({}, this.state.productScoreItem, {
+      testCaseDensity: values.testCaseDensity,
       productOverallScore: values.productOverallScore,
       productFinalScore: values.productFinalScore,
     });
@@ -315,6 +307,21 @@ class Audit extends React.Component<any, IState> {
       }
     });
   };
+  autoCalValue = (values: any, productVotedScore: any) => {
+    values.productVotedScore = productVotedScore;
+    values.testCaseDensity = this.calTestCaseDensity(
+      values.testCaseAssertSuccess,
+      values.productCodeLine
+    );
+    values.productOverallScore = this.calProductOverallScore(values);
+    values.productFinalScore = math.format(
+      math.add(
+        math.bignumber(values.productVotedScore),
+        math.bignumber(values.productOverallScore)
+      ),
+      { precision: precision }
+    );
+  };
   calTestCaseDensity = (testCaseAssertSuccess: any, productCodeLine: any) => {
     if (isEmpty(productCodeLine) || productCodeLine === 0) {
       return 0;
@@ -322,27 +329,71 @@ class Audit extends React.Component<any, IState> {
     if (isEmpty(testCaseAssertSuccess)) {
       return 0;
     }
-    return (testCaseAssertSuccess * 1000) / productCodeLine; // 返回2位小数
+    var testCaseDensity = math.format(
+      math.divide(
+        math.bignumber(testCaseAssertSuccess * 1000),
+        math.bignumber(productCodeLine)
+      ),
+      { precision: precision }
+    ); // 返回2位小数
+    console.log(0.1 + 0.2);
+    console.info(
+      "testCaseDensity:" +
+        testCaseDensity +
+        "," +
+        (testCaseAssertSuccess * 1000) / productCodeLine
+    );
+    return testCaseDensity;
   };
   calProductOverallScore = (values: any) => {
-    let sum = 0;
+    var sum = 0;
     if (!isEmpty(values.testCaseQuality)) {
-      sum += values.testCaseQuality * 0.2;
+      sum = math
+        .chain(math.bignumber(values.testCaseQuality))
+        .multiply(math.bignumber(0.2))
+        .add(math.bignumber(sum))
+        .done();
+      // sum += values.testCaseQuality * 0.2;
     }
     if (!isEmpty(values.testCaseEfficiency)) {
-      sum += values.testCaseEfficiency * 0.1;
+      sum = math
+        .chain(math.bignumber(values.testCaseEfficiency))
+        .multiply(math.bignumber(0.1))
+        .add(math.bignumber(sum))
+        .done();
+      // sum += values.testCaseEfficiency * 0.1;
     }
-    sum += values.testCaseDensity * 0.3;
+    sum = math
+      .chain(math.bignumber(values.testCaseDensity))
+      .multiply(math.bignumber(0.3))
+      .add(math.bignumber(sum))
+      .done();
+    // sum += values.testCaseDensity * 0.3;
     if (!isEmpty(values.testCaseLineCoverage)) {
-      sum += values.testCaseLineCoverage * 0.2;
+      sum = math
+        .chain(math.bignumber(values.testCaseLineCoverage))
+        .multiply(math.bignumber(0.2))
+        .add(math.bignumber(sum))
+        .done();
+      // sum += values.testCaseLineCoverage * 0.2;
     }
     if (!isEmpty(values.testCaseBranchCoverage)) {
-      sum += values.testCaseBranchCoverage * 0.1;
+      sum = math
+        .chain(math.bignumber(values.testCaseBranchCoverage))
+        .multiply(math.bignumber(0.1))
+        .add(math.bignumber(sum))
+        .done();
+      // sum += values.testCaseBranchCoverage * 0.1;
     }
     if (!isEmpty(values.productQualityScore)) {
-      sum += values.productQualityScore * 0.1;
+      sum = math
+        .chain(math.bignumber(values.productQualityScore))
+        .multiply(math.bignumber(0.1))
+        .add(math.bignumber(sum))
+        .done();
+      // sum += values.productQualityScore * 0.1;
     }
-    return sum; // 返回2位小数
+    return math.format(sum, { precision: precision }); // 返回2位小数
   };
   onEdit = () => {
     this.formRef.current!.setFieldsValue({
