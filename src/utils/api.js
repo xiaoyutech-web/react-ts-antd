@@ -60,15 +60,22 @@ export function submitProductScore(data) {
 }
 
 //按分数排序获取产品列表
-export function queryProductScoreList(params) {
+export function queryProductScoreList(data) {
   return network({
     url: `product/score/list`,
-    method: "get",
-    params,
+    method: "post",
+    data,
   });
 }
 
-
+//更新产品分数
+export function updateProductScore(data) {
+  return network({
+    url: `product/score/update `,
+    method: "post",
+    data,
+  });
+}
 
 
 

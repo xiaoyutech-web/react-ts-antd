@@ -17,7 +17,7 @@ import {
   Switch,
   Divider,
 } from "antd";
-
+import store from "@/store";
 import { StarOutlined, StarTwoTone, PlusOutlined } from "@ant-design/icons";
 import { ColumnsType } from "antd/es/table";
 
@@ -29,6 +29,7 @@ import {
   queryTeamList,
   queryProductList,
   submitProductScore,
+  updateProductScore,
 } from "@/utils/api";
 import { formatDate, isEmpty } from "@/utils/valid";
 
@@ -53,6 +54,7 @@ interface ProductScore {
   productFinalScore: number;
   productOverallScore: number;
   productVotedScore: number;
+  sid: string;
   did: string;
   tid: string;
   pdid: string;
@@ -120,6 +122,7 @@ class Audit extends React.Component<any, IState> {
         productFinalScore: 0,
         productOverallScore: 0,
         productVotedScore: 0,
+        sid: "",
         did: "",
         tid: "",
         pdid: "",
@@ -151,6 +154,7 @@ class Audit extends React.Component<any, IState> {
       productOptions: [],
     };
   }
+
   formRef = React.createRef<FormInstance>();
   displayRender = (label: any) => {
     return label[label.length - 1];
@@ -182,7 +186,6 @@ class Audit extends React.Component<any, IState> {
   };
   onProductChange = (label: any) => {
     console.log("onProductChange:" + label);
-
     let data = Object.assign({}, this.state.productScoreItem, {
       pdid: label[0],
       pid: label[1],
@@ -199,7 +202,6 @@ class Audit extends React.Component<any, IState> {
     console.log("onVotedScoreChange:" + JSON.stringify(values));
     this.autoCalValue(values, value);
     console.log("onVotedScoreChange after cal:" + JSON.stringify(values));
-
     let data = Object.assign({}, values, {
       productOverallScore: values.productOverallScore,
       productFinalScore: values.productFinalScore,
@@ -253,8 +255,10 @@ class Audit extends React.Component<any, IState> {
     this.setState({
       loading: true,
     });
-
-    queryProductScoreList()
+    var param = {
+      tid: (store.getState() as any).user.data.tid,
+    };
+    queryProductScoreList(param)
       .then((res: any) => {
         console.log("queryProductScoreList===", res);
         this.setState({
@@ -262,7 +266,7 @@ class Audit extends React.Component<any, IState> {
         });
 
         if (res.code === 0) {
-          if (res.data.length === 1) {
+          if (res.data.length >= 1) {
             //有评审，展示数据
             this.setState({
               edit: false,
@@ -380,6 +384,7 @@ class Audit extends React.Component<any, IState> {
       return;
     }
     let values = this.formRef.current!.getFieldsValue();
+    values.sid = this.state.productScoreItem.sid;
     values.did = this.state.productScoreItem.did;
     values.tid = this.state.productScoreItem.tid;
     values.pdid = this.state.productScoreItem.pdid;
@@ -387,18 +392,33 @@ class Audit extends React.Component<any, IState> {
     values.mid = this.state.productScoreItem.mid;
     this.autoCalValue(values, this.state.productScoreItem.productVotedScore);
     console.log("onSubmit===", values);
-    submitProductScore(values).then((res: any) => {
-      console.log("submitProductScore===", res);
-      if (res.code === 0) {
-        message.success("提交成功");
-        this.setState({
-          edit: false,
-        });
-        this.handleGetProductScoreInfo();
-      } else {
-        message.error(res.message);
-      }
-    });
+    if (this.state.edit) {
+      updateProductScore(values).then((res: any) => {
+        console.log("submitProductScore===", res);
+        if (res.code === 0) {
+          message.success("编辑成功");
+          this.setState({
+            edit: false,
+          });
+          this.handleGetProductScoreInfo();
+        } else {
+          message.error(res.message);
+        }
+      });
+    } else {
+      submitProductScore(values).then((res: any) => {
+        console.log("submitProductScore===", res);
+        if (res.code === 0) {
+          message.success("提交成功");
+          this.setState({
+            edit: false,
+          });
+          this.handleGetProductScoreInfo();
+        } else {
+          message.error(res.message);
+        }
+      });
+    }
   };
   result = () => {
     if (this.state.productScoreItem.testCaseRunable === 1) {
@@ -410,13 +430,13 @@ class Audit extends React.Component<any, IState> {
     }
   };
   render() {
-    const {
-      teamOptions,
-      productOptions,
-
-      edit,
-      productScoreItem,
-    } = this.state;
+    const { teamOptions, productOptions, edit, productScoreItem } = this.state;
+    var selectdTeam = [productScoreItem.department, productScoreItem.team];
+    var selectdProduct = [
+      productScoreItem.pdepartment,
+      productScoreItem.product,
+      productScoreItem.module,
+    ];
 
     const info = (
       <div className="content">
@@ -519,11 +539,12 @@ class Audit extends React.Component<any, IState> {
           <div className="item">
             参赛团队：
             <Cascader
-              onChange={this.onTeamChange}
+              // onChange={this.onTeamChange}
               options={teamOptions}
+              disabled={true}
               expandTrigger="hover"
               // displayRender={this.displayRender}
-              defaultValue={["zhejiang", "hangzhou", "xihu"]}
+              defaultValue={selectdTeam}
               fieldNames={{
                 label: "label",
                 value: "value",
@@ -535,6 +556,7 @@ class Audit extends React.Component<any, IState> {
             <Cascader
               onChange={this.onProductChange}
               options={productOptions}
+              defaultValue={selectdProduct}
               expandTrigger="hover"
               // displayRender={this.displayRender}
               fieldNames={{
@@ -666,10 +688,12 @@ class Audit extends React.Component<any, IState> {
           <Footer />
           <Affix offsetBottom={70} onChange={(affixed) => console.log(affixed)}>
             <div className="pannel">
-              <span>投票得分：{productScoreItem.productVotedScore}</span>
-              <span>综合得分：{productScoreItem.productOverallScore}</span>
-              <span>(其中密度分：{productScoreItem.testCaseDensity})</span>
-              <span>总分：{productScoreItem.productFinalScore}</span>
+              投票得分：{productScoreItem.productVotedScore}
+              <br />
+              综合得分：{productScoreItem.productOverallScore}
+              (其中密度分：{productScoreItem.testCaseDensity}) <br />
+              总分：
+              {productScoreItem.productFinalScore}
               <Button onClick={edit ? this.onSubmit : this.onEdit}>
                 {edit ? "提交" : "编辑"}
               </Button>
