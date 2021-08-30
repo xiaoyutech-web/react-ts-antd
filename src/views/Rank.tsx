@@ -30,9 +30,9 @@ import {
   editTask,
   updateTaskStatus,
   updateMark,
-  deleteTask,
+  queryProductList,
 } from "@/utils/api";
-import { formatDate, formatTime } from "@/utils/valid";
+import { isEmpty, formatTime } from "@/utils/valid";
 
 interface Task {
   id: number;
@@ -60,9 +60,11 @@ interface IState {
   visible: boolean;
   currentRowData: Values;
   status: any;
+  param: any;
   // columns: ColumnsType<Task>;
   dataSource: Task[];
   filteredInfo: any;
+  productOptions: [];
 }
 
 interface IProps {
@@ -83,6 +85,7 @@ class Rank extends React.Component<any, IState> {
       pageNo: 1,
       pageSize: 10,
       loading: false,
+      param: {},
       textBtn: "提交",
       title: "添加任务",
       currentRowData: {
@@ -93,7 +96,7 @@ class Rank extends React.Component<any, IState> {
       },
       visible: false,
       dataSource: [],
-
+      productOptions: [],
       status: null, // 0：待办 1：完成 2：删除
       // columns: [
       //   {
@@ -174,22 +177,34 @@ class Rank extends React.Component<any, IState> {
   componentDidMount() {
     console.log("componentDidMount===");
     this.getProductScoreList();
+    this.handleGetProductList();
   }
 
   componentWillUnmount() {
     console.log("componentWillUnmount===");
   }
-
+  handleGetProductList = () => {
+    queryProductList().then((res: any) => {
+      console.log("queryProductList===", res);
+      if (res.code === 0) {
+        this.setState({
+          productOptions: res.data,
+        });
+      } else {
+        if (!isEmpty(res.message)) {
+          message.error(res.message);
+        }
+      }
+    });
+  };
   // 获取任务列表数据
   getProductScoreList = () => {
-    const { pageNo, pageSize, status } = this.state;
+    const { pageNo, pageSize, param } = this.state;
     this.setState({
       loading: true,
     });
 
-    let params = {};
-
-    queryProductScoreList(params)
+    queryProductScoreList(param)
       .then((res: any) => {
         console.log("列表===", res);
         this.setState({
@@ -229,11 +244,11 @@ class Rank extends React.Component<any, IState> {
   };
 
   // 筛选任务状态
-  handleChange = (value: number) => {
-    console.log("任务状态筛选===", typeof value === "string");
+  handleChange = (value: any) => {
+    console.log("筛选===", typeof value === "string");
     this.setState(
       {
-        status: typeof value === "string" ? null : value,
+        param: { pdid: value },
         pageNo: 1,
       },
       () => {
@@ -262,7 +277,7 @@ class Rank extends React.Component<any, IState> {
       // columns,
       visible,
       title,
-      textBtn,
+      productOptions,
       currentRowData,
       filteredInfo,
     } = this.state;
@@ -285,16 +300,16 @@ class Rank extends React.Component<any, IState> {
         dataIndex: "pdepartment",
         width: 150,
         key: "pdepartment",
-        filters: [
-          { text: "营业厅+App", value: 0 },
-          { text: "营业厅+H5", value: 1 },
-          { text: "营业厅", value: 2 },
-          { text: "敬请期待", value: 3 },
-          { text: "广东定制", value: 4 },
-          { text: "浙江定制", value: 5 },
-        ],
-        filteredValue: filteredInfo.pdepartment || null,
-        onFilter: (value: any, record: any) => record.pdepartment === value,
+        // filters: [
+        //   { text: "营业厅+App", value: 0 },
+        //   { text: "营业厅+H5", value: 1 },
+        //   { text: "营业厅", value: 2 },
+        //   { text: "敬请期待", value: 3 },
+        //   { text: "广东定制", value: 4 },
+        //   { text: "浙江定制", value: 5 },
+        // ],
+        // filteredValue: filteredInfo.pdepartment || null,
+        // onFilter: (value: any, record: any) => record.pdepartment === value,
       },
       {
         title: "被评审产品",
@@ -383,10 +398,11 @@ class Rank extends React.Component<any, IState> {
                     onChange={this.handleChange}
                     style={{ width: 160 }}
                     allowClear
-                    placeholder="请筛选部门"
+                    options={productOptions}
+                    placeholder="请筛选被评审部门"
                   >
-                    <Option value="">全部</Option>
-                    <Option value={0}>待办</Option>
+                    {/* <Option value="">全部</Option>
+                    <Option value={0}>待办</Option> */}
                   </Select>
                   <Button type="primary" size="large">
                     <ExportOutlined /> 导出
