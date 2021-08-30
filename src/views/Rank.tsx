@@ -15,6 +15,7 @@ import {
   Select,
   Tooltip,
   Form,
+  Modal,
   Input,
   DatePicker,
 } from "antd";
@@ -34,6 +35,7 @@ import {
   queryProductList,
 } from "@/utils/api";
 import { isEmpty, formatTime } from "@/utils/valid";
+import ScoreInfo from "@/components/ScoreInfo";
 
 interface Task {
   id: number;
@@ -172,20 +174,20 @@ class Rank extends React.Component<any, IState> {
           key: "gmt_expire",
           render: (text: any, record: any) => formatTime(record.gmt_expire),
         },
-      // {
-      //   title: "操作",
-      //   dataIndex: "action",
-      //   key: "action",
-      //   render: (text: any, record: any) => (
-      //     <div>
-      //       {
-      //         <Tooltip title="查看">
-      //           <Button>查看</Button>
-      //         </Tooltip>
-      //       }
-      //     </div>
-      //   ),
-      // },
+        {
+          title: "操作",
+          dataIndex: "action",
+          key: "action",
+          render: (text: any, record: any) => (
+            <div>
+              {
+                <Tooltip title="查看详情">
+                  <Button onClick={this.showDetail.bind(record)}>查看</Button>
+                </Tooltip>
+              }
+            </div>
+          ),
+        },
       ],
     };
   }
@@ -199,6 +201,19 @@ class Rank extends React.Component<any, IState> {
   componentWillUnmount() {
     console.log("componentWillUnmount===");
   }
+  showDetail = (record: any) => {
+    
+    debugger
+    this.setState({
+      visible: true,
+      currentRowData: record,
+    });
+  };
+  hideDetail = () => {
+    this.setState({
+      visible: false,
+    });
+  };
   handleGetProductList = () => {
     queryProductList().then((res: any) => {
       console.log("queryProductList===", res);
@@ -454,8 +469,19 @@ class Rank extends React.Component<any, IState> {
       <DocumentTitle title={"排名"}>
         <div className="rank-container">
           <Header curActive={"/rank"} />
-
           <div className="content clearfix">
+            <Modal
+              width={1000}
+              title="批量录入故障收集"
+              visible={visible}
+              onOk={this.hideDetail}
+              onCancel={this.hideDetail}
+              okText={"确定"}
+              cancelText={"取消"}
+              // maskClosable={false}
+            >
+              <ScoreInfo productScoreItem={currentRowData}></ScoreInfo>
+            </Modal>
             <div className="list">
               <h2>排行榜</h2>
               <div className="list-right">
