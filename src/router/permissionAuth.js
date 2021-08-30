@@ -14,7 +14,7 @@ export class PermissionAuth extends React.Component {
     const targetRouterConfig = config.find((v) => v.path === pathname);
     if (targetRouterConfig && !targetRouterConfig.auth && !isLogin) {
       const { component } = targetRouterConfig;
-      console.error("config component" + JSON.stringify(component));
+      console.error("config component" + JSON.stringify(targetRouterConfig));
       return <Route exact path={pathname} component={component} />;
     }
 
