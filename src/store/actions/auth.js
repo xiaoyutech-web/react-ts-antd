@@ -2,7 +2,9 @@ import { saveUserInfo, clearUserInfo } from "./user";
 import { loginUser, registerUser } from "@/utils/api";
 import { Base64 } from "js-base64";
 export const login = (username, password) => (dispatch) => {
-  var basic = Base64.encode(password + ":" + username.trim());
+  console.info(username.trim() + ":" + password);
+  var basic = Base64.encode(username.trim() + ":" + password);
+  console.info(basic);
   return new Promise((resolve, reject) => {
     loginUser(basic).then((res) => {
       console.log("auth===", res);
