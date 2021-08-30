@@ -297,8 +297,16 @@ class Audit extends React.Component<any, IState> {
             });
           } else {
             //如果没有评审过，那么进行新建
+            let user = (store.getState() as any).user.data;
+            let data = Object.assign({}, this.state.productScoreItem, {
+              did: user.did,
+              tid: user.tid,
+              department: user.department,
+              team: user.team,
+            });
             this.setState({
               edit: true,
+              productScoreItem: data,
             });
           }
         }
@@ -480,7 +488,7 @@ class Audit extends React.Component<any, IState> {
     values.mid = this.state.productScoreItem.mid;
     this.autoCalValue(values, this.state.productScoreItem.productVotedScore);
     console.log("onSubmit===", values);
-    if (this.state.edit) {
+    if (!isEmpty(values.sid)) {
       updateProductScore(values).then((res: any) => {
         console.log("submitProductScore===", res);
         if (res.code === 0) {
@@ -818,7 +826,6 @@ class Audit extends React.Component<any, IState> {
         <div className="audit-container">
           <Header curActive={"/audit"} />
           {!edit ? info : editInfo}
-       
           <div className="pannel">
             投票得分：{productScoreItem.productVotedScore}
             {/* <br /> */}
@@ -831,14 +838,17 @@ class Audit extends React.Component<any, IState> {
                 .done(),
               { precision: precision }
             )}
-            ) 
-            {/* <br /> */}
+            ){/* <br /> */}
             &nbsp; &nbsp; 总分：
             {productScoreItem.productFinalScore}
-            <Button style={{marginLeft:10}} onClick={edit ? this.onSubmit : this.onEdit}>
+            <Button
+              style={{ marginLeft: 10 }}
+              onClick={edit ? this.onSubmit : this.onEdit}
+            >
               {edit ? "提交" : "编辑"}
             </Button>
-          </div>   <Footer />
+          </div>{" "}
+          <Footer />
         </div>
       </DocumentTitle>
     );
