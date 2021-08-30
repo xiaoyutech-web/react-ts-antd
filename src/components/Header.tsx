@@ -171,8 +171,14 @@ const Header = (props: any) => {
     if (e.key === "1") {
       setVisible(true);
     } else {
-      logoutUser();
-      store.dispatch(logout());
+      logoutUser().then((res: any) => {
+        console.log("logoutUser===", res);
+        if (res.code === 0) {
+          store.dispatch(logout());
+        } else {
+          message.error("退出失败");
+        }
+      });
     }
   };
 
