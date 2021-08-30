@@ -13,6 +13,7 @@ import {
   Pagination,
   message,
   Select,
+  Tooltip,
   Form,
   Input,
   DatePicker,
@@ -59,7 +60,7 @@ interface IState {
   visible: boolean;
   currentRowData: Values;
   status: any;
-  columns: ColumnsType<Task>;
+  // columns: ColumnsType<Task>;
   dataSource: Task[];
   filteredInfo: any;
 }
@@ -77,7 +78,7 @@ class Rank extends React.Component<any, IState> {
   constructor(props: any) {
     super(props);
     this.state = {
-      filteredInfo: null,
+      filteredInfo: {},
       total: 0,
       pageNo: 1,
       pageSize: 10,
@@ -94,79 +95,79 @@ class Rank extends React.Component<any, IState> {
       dataSource: [],
 
       status: null, // 0：待办 1：完成 2：删除
-      columns: [
-        {
-          title: "序号",
-          key: "id",
-          align: "center",
-          render: (text: any, record: any, index: number) => {
-            let num = (this.state.pageNo - 1) * 10 + index + 1;
-            return num;
-          },
-        },
-        {
-          title: "参赛部门",
-          dataIndex: "department",
-          width: 150,
-          key: "department",
-        },
-        {
-          title: "参赛团队",
-          dataIndex: "team",
-          width: 150,
-          key: "team",
-        },
-        {
-          title: "被评审产品部门",
-          dataIndex: "pdepartment",
-          width: 150,
-          key: "pdepartment",
-          filters: [
-            {text: '营业厅+App', value: 0},
-            {text: '营业厅+H5', value: 1},
-            {text: '营业厅', value: 2},
-            {text: '敬请期待', value: 3},
-            {text: '广东定制', value: 4},
-            {text: '浙江定制', value: 5},
-          ],
-          // filteredValue: filteredInfo.pdepartment || null,
-          // onFilter: (value, record) => record.type === value,
-        },
-        {
-          title: "被评审产品",
-          dataIndex: "product",
-          key: "product",
-        },
-        {
-          title: "被评审模块",
-          dataIndex: "module",
-          key: "module",
-        },
-        {
-          title: "产品质量综合得分",
-          dataIndex: "productOverallScore",
-          key: "productOverallScore",
-          width: 150,
-        },
-        {
-          title: "产品质量投票得分",
-          dataIndex: "productVotedScore",
-          key: "productVotedScore",
-          width: 150,
-        },
-        {
-          title: "总分",
-          dataIndex: "productFinalScore",
-          key: "productFinalScore",
-          width: 150,
-        },
-        {
-          title: "提交日期",
-          dataIndex: "gmt_expire",
-          key: "gmt_expire",
-          render: (text: any, record: any) => formatTime(record.gmt_expire),
-        },
-      ],
+      // columns: [
+      //   {
+      //     title: "序号",
+      //     key: "id",
+      //     align: "center",
+      //     render: (text: any, record: any, index: number) => {
+      //       let num = (this.state.pageNo - 1) * 10 + index + 1;
+      //       return num;
+      //     },
+      //   },
+      //   {
+      //     title: "参赛部门",
+      //     dataIndex: "department",
+      //     width: 150,
+      //     key: "department",
+      //   },
+      //   {
+      //     title: "参赛团队",
+      //     dataIndex: "team",
+      //     width: 150,
+      //     key: "team",
+      //   },
+      //   {
+      //     title: "被评审产品部门",
+      //     dataIndex: "pdepartment",
+      //     width: 150,
+      //     key: "pdepartment",
+      //     filters: [
+      //       {text: '营业厅+App', value: 0},
+      //       {text: '营业厅+H5', value: 1},
+      //       {text: '营业厅', value: 2},
+      //       {text: '敬请期待', value: 3},
+      //       {text: '广东定制', value: 4},
+      //       {text: '浙江定制', value: 5},
+      //     ],
+      //     // filteredValue: filteredInfo.pdepartment || null,
+      //     // onFilter: (value, record) => record.type === value,
+      //   },
+      //   {
+      //     title: "被评审产品",
+      //     dataIndex: "product",
+      //     key: "product",
+      //   },
+      //   {
+      //     title: "被评审模块",
+      //     dataIndex: "module",
+      //     key: "module",
+      //   },
+      //   {
+      //     title: "产品质量综合得分",
+      //     dataIndex: "productOverallScore",
+      //     key: "productOverallScore",
+      //     width: 150,
+      //   },
+      //   {
+      //     title: "产品质量投票得分",
+      //     dataIndex: "productVotedScore",
+      //     key: "productVotedScore",
+      //     width: 150,
+      //   },
+      //   {
+      //     title: "总分",
+      //     dataIndex: "productFinalScore",
+      //     key: "productFinalScore",
+      //     width: 150,
+      //   },
+      //   {
+      //     title: "提交日期",
+      //     dataIndex: "gmt_expire",
+      //     key: "gmt_expire",
+      //     render: (text: any, record: any) => formatTime(record.gmt_expire),
+      //   },
+      // ],
     };
   }
 
@@ -213,8 +214,6 @@ class Rank extends React.Component<any, IState> {
         });
       });
   };
- 
- 
 
   // 页码改变的回调，返回改变后的页码
   changePage = (pageNo: number) => {
@@ -242,7 +241,7 @@ class Rank extends React.Component<any, IState> {
       }
     );
   };
-  handleTableChange = (pagination:any, filters:any, sorter:any) => {
+  handleTableChange = (pagination: any, filters: any, sorter: any) => {
     // this.fetch({
     //   sortField: sorter.field,
     //   sortOrder: sorter.order,
@@ -251,7 +250,6 @@ class Rank extends React.Component<any, IState> {
     // });
     this.setState({
       filteredInfo: filters,
-   
     });
   };
   render() {
@@ -261,14 +259,92 @@ class Rank extends React.Component<any, IState> {
       pageSize,
       loading,
       dataSource,
-      columns,
+      // columns,
       visible,
       title,
       textBtn,
-      currentRowData,filteredInfo 
+      currentRowData,
+      filteredInfo,
     } = this.state;
     const { Option } = Select;
-
+    const columns = [
+      {
+        title: "参赛部门",
+        dataIndex: "department",
+        width: 150,
+        key: "department",
+      },
+      {
+        title: "参赛团队",
+        dataIndex: "team",
+        width: 150,
+        key: "team",
+      },
+      {
+        title: "被评审产品部门",
+        dataIndex: "pdepartment",
+        width: 150,
+        key: "pdepartment",
+        filters: [
+          { text: "营业厅+App", value: 0 },
+          { text: "营业厅+H5", value: 1 },
+          { text: "营业厅", value: 2 },
+          { text: "敬请期待", value: 3 },
+          { text: "广东定制", value: 4 },
+          { text: "浙江定制", value: 5 },
+        ],
+        filteredValue: filteredInfo.pdepartment || null,
+        onFilter: (value: any, record: any) => record.pdepartment === value,
+      },
+      {
+        title: "被评审产品",
+        dataIndex: "product",
+        key: "product",
+      },
+      {
+        title: "被评审模块",
+        dataIndex: "module",
+        key: "module",
+      },
+      {
+        title: "产品质量综合得分",
+        dataIndex: "productOverallScore",
+        key: "productOverallScore",
+        width: 150,
+      },
+      {
+        title: "产品质量投票得分",
+        dataIndex: "productVotedScore",
+        key: "productVotedScore",
+        width: 150,
+      },
+      {
+        title: "总分",
+        dataIndex: "productFinalScore",
+        key: "productFinalScore",
+        width: 150,
+      },
+      {
+        title: "提交日期",
+        dataIndex: "gmt_expire",
+        key: "gmt_expire",
+        render: (text: any, record: any) => formatTime(record.gmt_expire),
+      },
+      {
+        title: "操作",
+        dataIndex: "action",
+        key: "action",
+        render: (text: any, record: any) => (
+          <div>
+            {
+              <Tooltip title="查看">
+                <Button>查看</Button>
+              </Tooltip>
+            }
+          </div>
+        ),
+      },
+    ];
     const config: any = {
       data: dataSource,
       xField: "module",
@@ -291,6 +367,7 @@ class Rank extends React.Component<any, IState> {
         productFinalScore: { alias: "总分" },
       },
     };
+
     return (
       <DocumentTitle title={"排名"}>
         <div className="rank-container">
