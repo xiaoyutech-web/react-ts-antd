@@ -1,6 +1,7 @@
 import { saveUserInfo, clearUserInfo } from "./user";
 import { loginUser, registerUser } from "@/utils/api";
 import { Base64 } from "js-base64";
+import { viewUrl } from "@/utils/url";
 export const login = (username, password) => (dispatch) => {
   console.info(username.trim() + ":" + password);
   var basic = Base64.encode(username.trim() + ":" + password);
@@ -37,5 +38,5 @@ export const register = (username, password) => (dispatch) => {
 export const logout = () => (dispatch) => {
   console.log("logout");
   dispatch(clearUserInfo());
-  window.location.href = "/login";
+  window.location.href = viewUrl + "/login";
 };
