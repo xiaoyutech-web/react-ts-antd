@@ -172,7 +172,7 @@ class Rank extends React.Component<any, IState> {
           title: "提交日期",
           dataIndex: "gmt_expire",
           key: "gmt_expire",
-          render: (text: any, record: any) => formatTime(record.gmt_expire),
+          render: (text: any, record: any) => formatTime(record.updateTime),
         },
         {
           title: "操作",
@@ -182,7 +182,7 @@ class Rank extends React.Component<any, IState> {
             <div>
               {
                 <Tooltip title="查看详情">
-                  <Button onClick={this.showDetail.bind(record)}>查看</Button>
+                  <Button onClick={() => this.showDetail(record)}>查看</Button>
                 </Tooltip>
               }
             </div>
@@ -202,8 +202,6 @@ class Rank extends React.Component<any, IState> {
     console.log("componentWillUnmount===");
   }
   showDetail = (record: any) => {
-    
-    debugger
     this.setState({
       visible: true,
       currentRowData: record,

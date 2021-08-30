@@ -549,8 +549,8 @@ class Audit extends React.Component<any, IState> {
             <InputNumber
               onChange={this.onVotedScoreChange}
               min={0}
-              formatter={this.limitPrecisionNumber}
-              parser={this.limitPrecisionNumber}
+              formatter={this.limitNumber}
+              parser={this.limitNumber}
               max={100}
               defaultValue={productScoreItem.productVotedScore}
               placeholder="0~100"
