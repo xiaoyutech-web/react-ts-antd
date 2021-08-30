@@ -1,12 +1,12 @@
 import network from "./network";
 
 // 登录
-export function loginUser(data) {
+export function loginUser(basic) {
   return network({
     url: `/login`,
     method: "get",
-    headers: { Authorization: "Basic emhhbmdxaXVibzpDaGFuZ2VNZTEyMw==" },
-    data,
+    headers: { Authorization: "Basic "+basic },
+    
   });
 }
 //退出登录
