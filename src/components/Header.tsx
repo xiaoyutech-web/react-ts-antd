@@ -12,7 +12,7 @@ import avatar from "@/assets/avatar.jpg";
 import "@/styles/header.less";
 import { resetPwd, logoutUser } from "@/utils/api";
 import { validPass } from "@/utils/valid";
-
+import { viewUrl } from "@/utils/url";
 interface Values {
   oldPassword: string;
   newPassword: string;
@@ -191,7 +191,7 @@ const Header = (props: any) => {
           <ul>
             <li>
               <a
-                href="/"
+                href={viewUrl + "/"}
                 rel="noopener noreferrer"
                 className={curActive === "/" ? "active" : ""}
               >
@@ -200,7 +200,7 @@ const Header = (props: any) => {
             </li>
             <li>
               <a
-                href="/audit"
+                href={viewUrl + "/audit"}
                 target="_self"
                 rel="noopener noreferrer"
                 className={curActive === "/audit" ? "active" : ""}
@@ -211,7 +211,7 @@ const Header = (props: any) => {
             {(store.getState() as any).user.data.role === "admin" ? (
               <li>
                 <a
-                  href="/rank"
+                  href={viewUrl + "/rank"}
                   target="_self"
                   rel="noopener noreferrer"
                   className={curActive === "/rank" ? "active" : ""}
@@ -228,7 +228,7 @@ const Header = (props: any) => {
         <Dropdown overlay={menu}>
           <a
             className="dropdown-link"
-            href="/#"
+            href={viewUrl + "/#"}
             onClick={(e) => e.preventDefault()}
           >
             <span className="username">
