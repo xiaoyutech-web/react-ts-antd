@@ -61,6 +61,7 @@ interface IState {
   status: any;
   columns: ColumnsType<Task>;
   dataSource: Task[];
+  filteredInfo: any;
 }
 
 interface IProps {
@@ -76,6 +77,7 @@ class Rank extends React.Component<any, IState> {
   constructor(props: any) {
     super(props);
     this.state = {
+      filteredInfo: null,
       total: 0,
       pageNo: 1,
       pageSize: 10,
@@ -119,6 +121,16 @@ class Rank extends React.Component<any, IState> {
           dataIndex: "pdepartment",
           width: 150,
           key: "pdepartment",
+          filters: [
+            {text: '营业厅+App', value: 0},
+            {text: '营业厅+H5', value: 1},
+            {text: '营业厅', value: 2},
+            {text: '敬请期待', value: 3},
+            {text: '广东定制', value: 4},
+            {text: '浙江定制', value: 5},
+          ],
+          // filteredValue: filteredInfo.pdepartment || null,
+          // onFilter: (value, record) => record.type === value,
         },
         {
           title: "被评审产品",
@@ -160,7 +172,7 @@ class Rank extends React.Component<any, IState> {
 
   componentDidMount() {
     console.log("componentDidMount===");
-    this.getTaskList();
+    this.getProductScoreList();
   }
 
   componentWillUnmount() {
@@ -168,7 +180,7 @@ class Rank extends React.Component<any, IState> {
   }
 
   // 获取任务列表数据
-  getTaskList = () => {
+  getProductScoreList = () => {
     const { pageNo, pageSize, status } = this.state;
     this.setState({
       loading: true,
@@ -186,7 +198,7 @@ class Rank extends React.Component<any, IState> {
         if (res.code === 0 && res.data) {
           this.setState({
             dataSource: res.data,
-            total: res.data.size,
+            total: res.data.length,
           });
         } else {
           this.setState({
@@ -201,91 +213,8 @@ class Rank extends React.Component<any, IState> {
         });
       });
   };
-
-  // 提交添加或编辑表单
-  onSubmit = (values: Values, type: number) => {
-    console.log("表单提交===", values);
-    const { currentRowData } = this.state;
-    if (type === 1) {
-      let data = {
-        title: values.title,
-        gmt_expire: moment(values.date).valueOf(),
-        content: values.content,
-      };
-
-      addTask(data)
-        .then((res: any) => {
-          console.log("添加任务===", res);
-          this.setState({
-            visible: false,
-          });
-          if (res.code === 0) {
-            this.setState(
-              {
-                pageNo: 1,
-              },
-              () => {
-                this.getTaskList();
-                message.success(`新增任务 <${values.title}> 成功`);
-              }
-            );
-          } else {
-            message.error(res.msg);
-          }
-        })
-        .catch(() => {
-          this.setState({
-            visible: false,
-          });
-        });
-    } else if (type === 2) {
-      let data = {
-        id: currentRowData.id,
-        title: values.title,
-        gmt_expire: moment(values.date).valueOf(),
-        content: values.content,
-      };
-
-      editTask(data)
-        .then((res: any) => {
-          console.log("编辑任务===", res);
-          this.setState({
-            visible: false,
-          });
-          if (res.code === 0) {
-            this.setState(
-              {
-                pageNo: 1,
-              },
-              () => {
-                this.getTaskList();
-                message.success(`更新任务 <${values.title}> 成功`);
-              }
-            );
-          } else {
-            message.error(res.msg);
-          }
-        })
-        .catch(() => {
-          this.setState({
-            visible: false,
-          });
-        });
-    }
-  };
-
-  // 关闭任务对话框
-  onClose = () => {
-    this.setState({
-      visible: false,
-      currentRowData: {
-        id: -1,
-        title: "",
-        date: "",
-        content: "",
-      },
-    });
-  };
+ 
+ 
 
   // 页码改变的回调，返回改变后的页码
   changePage = (pageNo: number) => {
@@ -295,7 +224,7 @@ class Rank extends React.Component<any, IState> {
         pageNo,
       },
       () => {
-        this.getTaskList();
+        this.getProductScoreList();
       }
     );
   };
@@ -309,11 +238,22 @@ class Rank extends React.Component<any, IState> {
         pageNo: 1,
       },
       () => {
-        this.getTaskList();
+        this.getProductScoreList();
       }
     );
   };
-
+  handleTableChange = (pagination:any, filters:any, sorter:any) => {
+    // this.fetch({
+    //   sortField: sorter.field,
+    //   sortOrder: sorter.order,
+    //   pagination,
+    //   ...filters,
+    // });
+    this.setState({
+      filteredInfo: filters,
+   
+    });
+  };
   render() {
     const {
       total,
@@ -325,7 +265,7 @@ class Rank extends React.Component<any, IState> {
       visible,
       title,
       textBtn,
-      currentRowData,
+      currentRowData,filteredInfo 
     } = this.state;
     const { Option } = Select;
 
@@ -392,19 +332,25 @@ class Rank extends React.Component<any, IState> {
               dataSource={dataSource}
               columns={columns}
               loading={loading}
-              pagination={false}
+              // pagination={false}
+              // onChange={this.changePage}
+              pagination={{
+                total: total,
+                pageSize: pageSize,
+              }}
+              onChange={this.handleTableChange}
             />
-            <Pagination
+            {/* <Pagination
               className="pagination"
               total={total}
               style={{ display: loading && total === 0 ? "none" : "" }}
               showTotal={(total) => `共 ${total} 条数据`}
               onChange={this.changePage}
-              current={pageNo}
-              showSizeChanger={false}
+              // current={pageNo}
+              // showSizeChanger={false}
               defaultPageSize={pageSize}
               hideOnSinglePage={false}
-            />
+            /> */}
           </div>
 
           <Footer />
