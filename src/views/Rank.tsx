@@ -18,6 +18,7 @@ import {
   Input,
   DatePicker,
 } from "antd";
+// import ExportJsonExcel from "js-export-excel";
 import { StarOutlined, StarTwoTone, ExportOutlined } from "@ant-design/icons";
 import { ColumnsType } from "antd/es/table";
 import moment from "moment";
@@ -102,6 +103,7 @@ class Rank extends React.Component<any, IState> {
         {
           title: "序号",
           key: "id",
+          dataIndex: "id",
           align: "center",
           render: (text: any, record: any, index: number) => {
             let num = (this.state.pageNo - 1) * 10 + index + 1;
@@ -229,7 +231,58 @@ class Rank extends React.Component<any, IState> {
         });
       });
   };
+  exportExcel = () => {
+    const ExportJsonExcel = require("js-export-excel");
+    const { dataSource } = this.state; // 网络请求命名空间
+    const { columns } = this.state; // 需要放在state里边,Table，Columns
 
+    var fileName = "排名数据详情";
+    var datas = [
+      {
+        sheetData: dataSource,
+        // sheetData: dataSource.map((item) => {
+        //   const result = {};
+        //   columns.forEach((c) => {
+        //     result[c.dataIndex] = item[c.dataIndex];
+        //   });
+        //   return result;
+        // }),
+        sheetName: "排名数据详情", // Excel文件名称
+        sheetFilter: [
+          "department",
+          "team",
+          "pdepartment",
+          "product",
+          "module",
+          "testCaseRunable",
+          "testCaseAssertSuccess",
+          "testCaseExceptionFailed",
+          "productCodeLine",
+          "productOverallScore",
+          "productQualityScore",
+          "productFinalScore",
+        ],
+        sheetHeader: [
+          "参赛部门",
+          "参赛团队",
+          "被评审产品部门",
+          "被评审产品",
+          "被评审模块",
+          "运行结果",
+          "有断言成功数",
+          "异常失败",
+          "代码行数",
+          "综合得分",
+          "产品质量投票得分",
+          "总分",
+        ],
+        columnWidths: columns.map(() => 10),
+      },
+    ];
+    const option = { fileName: fileName, datas: datas };
+    const toExcel = new ExportJsonExcel(option);
+    toExcel.saveExcel();
+  };
   // 页码改变的回调，返回改变后的页码
   changePage = (pageNo: number) => {
     console.log("pageNo=", pageNo);
@@ -404,7 +457,11 @@ class Rank extends React.Component<any, IState> {
                     {/* <Option value="">全部</Option>
                     <Option value={0}>待办</Option> */}
                   </Select>
-                  <Button type="primary" size="large">
+                  <Button
+                    type="primary"
+                    size="large"
+                    onClick={this.exportExcel}
+                  >
                     <ExportOutlined /> 导出
                   </Button>
                 </Space>
