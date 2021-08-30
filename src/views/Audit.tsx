@@ -818,28 +818,27 @@ class Audit extends React.Component<any, IState> {
         <div className="audit-container">
           <Header curActive={"/audit"} />
           {!edit ? info : editInfo}
-          <Footer />
-          <Affix offsetBottom={70} onChange={(affixed) => console.log(affixed)}>
-            <div className="pannel">
-              投票得分：{productScoreItem.productVotedScore}
-              <br />
-              综合得分：{productScoreItem.productOverallScore}
-              (其中密度分：
-              {math.format(
-                math
-                  .chain(0.2)
-                  .multiply(math.bignumber(productScoreItem.testCaseDensity))
-                  .done(),
-                { precision: precision }
-              )}
-              ) <br />
-              总分：
-              {productScoreItem.productFinalScore}
-              <Button onClick={edit ? this.onSubmit : this.onEdit}>
-                {edit ? "提交" : "编辑"}
-              </Button>
-            </div>
-          </Affix>
+       
+          <div className="pannel">
+            投票得分：{productScoreItem.productVotedScore}
+            {/* <br /> */}
+            &nbsp;&nbsp;综合得分：{productScoreItem.productOverallScore}
+            (其中密度分：
+            {math.format(
+              math
+                .chain(0.2)
+                .multiply(math.bignumber(productScoreItem.testCaseDensity))
+                .done(),
+              { precision: precision }
+            )}
+            ) 
+            {/* <br /> */}
+            &nbsp; &nbsp; 总分：
+            {productScoreItem.productFinalScore}
+            <Button style={{marginLeft:10}} onClick={edit ? this.onSubmit : this.onEdit}>
+              {edit ? "提交" : "编辑"}
+            </Button>
+          </div>   <Footer />
         </div>
       </DocumentTitle>
     );
