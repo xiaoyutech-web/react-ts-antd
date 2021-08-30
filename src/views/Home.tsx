@@ -72,7 +72,7 @@ class Home extends React.Component<any> {
         <div className="home-container">
           <Header curActive={"/"} />
 
-          <div className="content clearfix">
+          <div className="content">
             <Descriptions title="个人信息" column={1} bordered>
               <Descriptions.Item label="部门">
                 {userdata.department}
