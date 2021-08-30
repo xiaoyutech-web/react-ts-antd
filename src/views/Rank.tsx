@@ -172,6 +172,20 @@ class Rank extends React.Component<any, IState> {
           key: "gmt_expire",
           render: (text: any, record: any) => formatTime(record.gmt_expire),
         },
+      // {
+      //   title: "操作",
+      //   dataIndex: "action",
+      //   key: "action",
+      //   render: (text: any, record: any) => (
+      //     <div>
+      //       {
+      //         <Tooltip title="查看">
+      //           <Button>查看</Button>
+      //         </Tooltip>
+      //       }
+      //     </div>
+      //   ),
+      // },
       ],
     };
   }

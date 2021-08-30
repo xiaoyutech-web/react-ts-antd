@@ -161,9 +161,22 @@ class Audit extends React.Component<any, IState> {
     return label[label.length - 1];
   };
   limitNumber = (value: any) => {
-    return !isNaN(value) ? String(value).replace(/^0(0+)|[^\d]+/g, "") : "";
+    //整数
+    return String(value).replace(/^0(0+)|[^\d]+/g, "");
+    // return !isNaN(value) ? String(value).replace(/^0(0+)|[^\d]+/g, "") : "";
   };
-
+  limitPrecisionNumber = (value: any) => {
+    //可输入小数，只有一个小数点
+    var result = String(value).replace(/[^\d.]/g, "");
+    var dot = result.split(".").length - 1;
+    if (dot > 1) {
+      return result.substr(0, result.lastIndexOf("."));
+    }
+    return result;
+    // return String(value).replace(/[^\d.]/g,"");
+    // return String(value).replace(/^0(0+)|[^\d]+/g, "");
+    // return !isNaN(value) ? String(value).replace(/^0(0+)|[^\d]+/g, "") : "";
+  };
   onTeamChange = (label: any) => {
     console.log("onTeamChange:" + label);
     let data = Object.assign({}, this.state.productScoreItem, {
@@ -626,6 +639,8 @@ class Audit extends React.Component<any, IState> {
             <InputNumber
               onChange={this.onVotedScoreChange}
               min={0}
+              formatter={this.limitPrecisionNumber}
+              parser={this.limitPrecisionNumber}
               max={100}
               defaultValue={productScoreItem.productVotedScore}
               placeholder="0~100"
@@ -682,6 +697,8 @@ class Audit extends React.Component<any, IState> {
                 label="无断言但成功："
               >
                 <InputNumber
+                  formatter={this.limitNumber}
+                  parser={this.limitNumber}
                   disabled={productScoreItem.testCaseRunable === 0}
                   min={0}
                   placeholder="默认0"
@@ -698,6 +715,8 @@ class Audit extends React.Component<any, IState> {
                 label="有断言但断言失败："
               >
                 <InputNumber
+                  formatter={this.limitNumber}
+                  parser={this.limitNumber}
                   disabled={productScoreItem.testCaseRunable === 0}
                   min={0}
                   placeholder="默认0"
@@ -705,31 +724,71 @@ class Audit extends React.Component<any, IState> {
               </Form.Item>
             </Form.Item>
             <Form.Item label="异常失败：" name="testCaseExceptionFailed">
-              <InputNumber min={0} />
-            </Form.Item>{" "}
+              <InputNumber
+                min={0}
+                formatter={this.limitNumber}
+                parser={this.limitNumber}
+              />
+            </Form.Item>
             <Form.Item label="总个数：" name="testCaseNumber">
-              <InputNumber min={0} />
-            </Form.Item>{" "}
+              <InputNumber
+                min={0}
+                formatter={this.limitNumber}
+                parser={this.limitNumber}
+              />
+            </Form.Item>
             <Form.Item label="代码行数：" name="productCodeLine">
-              <InputNumber min={0} />
+              <InputNumber
+                min={0}
+                formatter={this.limitNumber}
+                parser={this.limitNumber}
+              />
             </Form.Item>{" "}
             <Form.Item label="质量评分：" name="testCaseQuality">
-              <InputNumber min={0} max={100} placeholder="0~100" />
+              <InputNumber
+                min={0}
+                max={100}
+                placeholder="0~100"
+                formatter={this.limitPrecisionNumber}
+                parser={this.limitPrecisionNumber}
+              />
             </Form.Item>{" "}
             <Form.Item label="有效性评分：" name="testCaseEfficiency">
-              <InputNumber min={0} max={100} placeholder="0~100" />
+              <InputNumber
+                min={0}
+                max={100}
+                placeholder="0~100"
+                formatter={this.limitPrecisionNumber}
+                parser={this.limitPrecisionNumber}
+              />
             </Form.Item>
             <Divider orientation="left" style={{ fontWeight: "bold" }}>
               覆盖率
             </Divider>
             <Form.Item name="testCaseLineCoverage" label="行覆盖率：">
-              <InputNumber min={0} max={100}></InputNumber>
+              <InputNumber
+                min={0}
+                max={100}
+                formatter={this.limitNumber}
+                parser={this.limitNumber}
+              ></InputNumber>
             </Form.Item>
             <Form.Item name="testCaseBranchCoverage" label="分支覆盖率：">
-              <InputNumber min={0} max={100} />
+              <InputNumber
+                min={0}
+                max={100}
+                formatter={this.limitNumber}
+                parser={this.limitNumber}
+              />
             </Form.Item>
             <Form.Item name="productQualityScore" label="产品质量评分：">
-              <InputNumber min={0} max={100} placeholder="0~100" />
+              <InputNumber
+                min={0}
+                max={100}
+                formatter={this.limitPrecisionNumber}
+                parser={this.limitPrecisionNumber}
+                placeholder="0~100"
+              />
             </Form.Item>
           </Form>
         </div>
@@ -747,7 +806,15 @@ class Audit extends React.Component<any, IState> {
               投票得分：{productScoreItem.productVotedScore}
               <br />
               综合得分：{productScoreItem.productOverallScore}
-              (其中密度分：{productScoreItem.testCaseDensity}) <br />
+              (其中密度分：
+              {math.format(
+                math
+                  .chain(0.2)
+                  .multiply(math.bignumber(productScoreItem.testCaseDensity))
+                  .done(),
+                { precision: precision }
+              )}
+              ) <br />
               总分：
               {productScoreItem.productFinalScore}
               <Button onClick={edit ? this.onSubmit : this.onEdit}>
