@@ -17,7 +17,7 @@ import {
   Divider,
 } from "antd";
 const ScoreInfo = (props: any) => {
-  const { productScoreItem } = props;
+  const { productScoreItem, ref } = props;
   const result = () => {
     if (productScoreItem.testCaseRunable === 1) {
       return "成功";
@@ -49,6 +49,7 @@ const ScoreInfo = (props: any) => {
           用例
         </Divider>
         <Form
+          ref={ref}
           labelCol={{ span: 4 }}
           wrapperCol={{ span: 10 }}
           layout="horizontal"

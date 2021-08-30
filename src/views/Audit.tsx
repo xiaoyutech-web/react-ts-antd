@@ -161,12 +161,17 @@ class Audit extends React.Component<any, IState> {
   displayRender = (label: any) => {
     return label[label.length - 1];
   };
-  limitNumber = (value: any) => {
+  limitNumberFormatter = (value: any) => {
     //整数
     return String(value).replace(/^0(0+)|[^\d]+/g, "");
     // return !isNaN(value) ? String(value).replace(/^0(0+)|[^\d]+/g, "") : "";
   };
-  limitPrecisionNumber = (value: any) => {
+  limitNumberParser = (value: any) => {
+    //整数
+    return parseFloat(String(value).replace(/^0(0+)|[^\d]+/g, ""));
+    // return !isNaN(value) ? String(value).replace(/^0(0+)|[^\d]+/g, "") : "";
+  };
+  limitPrecisionNumberFormatter = (value: any) => {
     //可输入小数，只有一个小数点
     var result = String(value).replace(/[^\d.]/g, "");
     var dot = result.split(".").length - 1;
@@ -174,6 +179,18 @@ class Audit extends React.Component<any, IState> {
       return result.substr(0, result.lastIndexOf("."));
     }
     return result;
+    // return String(value).replace(/[^\d.]/g,"");
+    // return String(value).replace(/^0(0+)|[^\d]+/g, "");
+    // return !isNaN(value) ? String(value).replace(/^0(0+)|[^\d]+/g, "") : "";
+  };
+  limitPrecisionNumberParser = (value: any) => {
+    //可输入小数，只有一个小数点
+    var result = String(value).replace(/[^\d.]/g, "");
+    var dot = result.split(".").length - 1;
+    if (dot > 1) {
+      result = result.substr(0, result.lastIndexOf("."));
+    }
+    return parseFloat(result);
     // return String(value).replace(/[^\d.]/g,"");
     // return String(value).replace(/^0(0+)|[^\d]+/g, "");
     // return !isNaN(value) ? String(value).replace(/^0(0+)|[^\d]+/g, "") : "";
@@ -414,6 +431,7 @@ class Audit extends React.Component<any, IState> {
     }
     return parseFloat(math.format(sum, { precision: precision })); // 返回2位小数
   };
+
   onEdit = () => {
     this.formRef.current!.setFieldsValue({
       testCaseRunable: this.state.productScoreItem.testCaseRunable,
@@ -508,7 +526,6 @@ class Audit extends React.Component<any, IState> {
       productScoreItem.module,
     ];
 
-    const info = <ScoreInfo productScoreItem={productScoreItem}></ScoreInfo>;
     const editInfo = (
       <div className="content">
         <div>
@@ -549,8 +566,8 @@ class Audit extends React.Component<any, IState> {
             <InputNumber
               onChange={this.onVotedScoreChange}
               min={0}
-              formatter={this.limitNumber}
-              parser={this.limitNumber}
+              formatter={this.limitNumberFormatter}
+              parser={this.limitNumberParser}
               max={100}
               defaultValue={productScoreItem.productVotedScore}
               placeholder="0~100"
@@ -562,8 +579,8 @@ class Audit extends React.Component<any, IState> {
             用例
           </Divider>
           <Form
-            onFieldsChange={this.onInputChange}
             ref={this.formRef}
+            onFieldsChange={this.onInputChange}
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 10 }}
             layout="horizontal"
@@ -589,8 +606,8 @@ class Audit extends React.Component<any, IState> {
                 name="testCaseAssertSuccess"
               >
                 <InputNumber
-                  formatter={this.limitNumber}
-                  parser={this.limitNumber}
+                  formatter={this.limitNumberFormatter}
+                  parser={this.limitNumberParser}
                   disabled={productScoreItem.testCaseRunable === 0}
                   min={0}
                   placeholder="默认0"
@@ -607,8 +624,8 @@ class Audit extends React.Component<any, IState> {
                 label="无断言但成功："
               >
                 <InputNumber
-                  formatter={this.limitNumber}
-                  parser={this.limitNumber}
+                  formatter={this.limitNumberFormatter}
+                  parser={this.limitNumberParser}
                   disabled={productScoreItem.testCaseRunable === 0}
                   min={0}
                   placeholder="默认0"
@@ -625,8 +642,8 @@ class Audit extends React.Component<any, IState> {
                 label="有断言但断言失败："
               >
                 <InputNumber
-                  formatter={this.limitNumber}
-                  parser={this.limitNumber}
+                  formatter={this.limitNumberFormatter}
+                  parser={this.limitNumberParser}
                   disabled={productScoreItem.testCaseRunable === 0}
                   min={0}
                   placeholder="默认0"
@@ -636,22 +653,22 @@ class Audit extends React.Component<any, IState> {
             <Form.Item label="异常失败：" name="testCaseExceptionFailed">
               <InputNumber
                 min={0}
-                formatter={this.limitNumber}
-                parser={this.limitNumber}
+                formatter={this.limitNumberFormatter}
+                parser={this.limitNumberParser}
               />
             </Form.Item>
             <Form.Item label="总个数：" name="testCaseNumber">
               <InputNumber
                 min={0}
-                formatter={this.limitNumber}
-                parser={this.limitNumber}
+                formatter={this.limitNumberFormatter}
+                parser={this.limitNumberParser}
               />
             </Form.Item>
             <Form.Item label="代码行数：" name="productCodeLine">
               <InputNumber
                 min={0}
-                formatter={this.limitNumber}
-                parser={this.limitNumber}
+                formatter={this.limitNumberFormatter}
+                parser={this.limitNumberParser}
               />
             </Form.Item>{" "}
             <Form.Item label="质量评分：" name="testCaseQuality">
@@ -659,8 +676,8 @@ class Audit extends React.Component<any, IState> {
                 min={0}
                 max={100}
                 placeholder="0~100"
-                formatter={this.limitPrecisionNumber}
-                parser={this.limitPrecisionNumber}
+                formatter={this.limitPrecisionNumberFormatter}
+                parser={this.limitPrecisionNumberParser}
               />
             </Form.Item>{" "}
             <Form.Item label="有效性评分：" name="testCaseEfficiency">
@@ -668,8 +685,8 @@ class Audit extends React.Component<any, IState> {
                 min={0}
                 max={100}
                 placeholder="0~100"
-                formatter={this.limitPrecisionNumber}
-                parser={this.limitPrecisionNumber}
+                formatter={this.limitPrecisionNumberFormatter}
+                parser={this.limitPrecisionNumberParser}
               />
             </Form.Item>
             <Divider orientation="left" style={{ fontWeight: "bold" }}>
@@ -679,24 +696,24 @@ class Audit extends React.Component<any, IState> {
               <InputNumber
                 min={0}
                 max={100}
-                formatter={this.limitNumber}
-                parser={this.limitNumber}
+                formatter={this.limitNumberFormatter}
+                parser={this.limitNumberParser}
               ></InputNumber>
             </Form.Item>
             <Form.Item name="testCaseBranchCoverage" label="分支覆盖率：">
               <InputNumber
                 min={0}
                 max={100}
-                formatter={this.limitNumber}
-                parser={this.limitNumber}
+                formatter={this.limitNumberFormatter}
+                parser={this.limitNumberParser}
               />
             </Form.Item>
             <Form.Item name="productQualityScore" label="产品质量评分：">
               <InputNumber
                 min={0}
                 max={100}
-                formatter={this.limitPrecisionNumber}
-                parser={this.limitPrecisionNumber}
+                formatter={this.limitPrecisionNumberFormatter}
+                parser={this.limitPrecisionNumberParser}
                 placeholder="0~100"
               />
             </Form.Item>
@@ -704,7 +721,98 @@ class Audit extends React.Component<any, IState> {
         </div>
       </div>
     );
-
+    const info = (
+      <div className="content">
+        <div>
+          <Divider orientation="left" style={{ fontWeight: "bold" }}>
+            参赛者信息
+          </Divider>
+          <div className="item">
+            参赛团队：
+            {productScoreItem.department}/{productScoreItem.team}
+            <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品/模块： </span>
+            {productScoreItem.pdepartment}/{productScoreItem.product}/{" "}
+            {productScoreItem.module}
+            <span> &nbsp; &nbsp; &nbsp; &nbsp;被评审产品投票得分： </span>
+            {productScoreItem.productVotedScore}
+          </div>
+        </div>
+        <div>
+          <Divider orientation="left" style={{ fontWeight: "bold" }}>
+            用例
+          </Divider>
+          <Form
+            ref={this.formRef}
+            labelCol={{ span: 4 }}
+            wrapperCol={{ span: 10 }}
+            layout="horizontal"
+            size="small"
+          >
+            <Form.Item label="运行结果">{this.result()}</Form.Item>
+            <Form.Item label="有断言且成功：">
+              <Form.Item
+                style={{
+                  display: "inline-flex",
+                  marginBottom: "0",
+                  width: "calc(25% - 4px)",
+                }}
+              >
+                {productScoreItem.testCaseAssertSuccess}
+              </Form.Item>
+              <Form.Item
+                style={{
+                  display: "inline-flex",
+                  marginBottom: "0",
+                  width: "calc(35% - 4px)",
+                  marginLeft: "0px",
+                }}
+                label="无断言但成功："
+              >
+                {productScoreItem.testCaseNoAssertSuccess}
+              </Form.Item>
+              <Form.Item
+                style={{
+                  display: "inline-flex",
+                  marginBottom: "0",
+                  width: "calc(35% - 4px)",
+                  marginLeft: "8px",
+                }}
+                label="有断言但断言失败："
+              >
+                {productScoreItem.testCaseAssertFailed}
+              </Form.Item>
+            </Form.Item>
+            <Form.Item label="异常失败：">
+              {productScoreItem.testCaseExceptionFailed}
+            </Form.Item>{" "}
+            <Form.Item label="总个数：">
+              {productScoreItem.testCaseNumber}
+            </Form.Item>{" "}
+            <Form.Item label="代码行数：">
+              {productScoreItem.productCodeLine}
+            </Form.Item>{" "}
+            <Form.Item label="质量评分：">
+              {productScoreItem.testCaseQuality}
+            </Form.Item>{" "}
+            <Form.Item label="有效性评分：">
+              {productScoreItem.testCaseEfficiency}
+            </Form.Item>
+            <Divider orientation="left" style={{ fontWeight: "bold" }}>
+              覆盖率
+            </Divider>
+            <Form.Item label="行覆盖率：">
+              {productScoreItem.testCaseLineCoverage}
+            </Form.Item>
+            <Form.Item label="分支覆盖率：">
+              {productScoreItem.testCaseBranchCoverage}
+            </Form.Item>
+            <Form.Item label="产品质量评分：">
+              {productScoreItem.productQualityScore}
+            </Form.Item>
+          </Form>
+        </div>
+      </div>
+    );
     return (
       <DocumentTitle title={"产品评审"}>
         <div className="audit-container">

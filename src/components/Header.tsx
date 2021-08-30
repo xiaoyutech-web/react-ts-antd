@@ -128,7 +128,7 @@ const Header = (props: any) => {
         }
         
         setLoading(true);
-        console.log((store.getState() as any).user.data)
+        // console.log((store.getState() as any).user.data)
         let username = (store.getState() as any).user.data.userData.username;
 
         let data = {
